@@ -1,0 +1,1 @@
+Module worker is bundled as dist/background.js and imports local shared chunks. It uses storage and alarms, requests no network permissions, and treats notifications as optional. All writers use the repository/Web Lock protocol. See docs/timing.md for reconciliation and at-most-once notification delivery limitations.

@@ -1,0 +1,9 @@
+import { createRequire } from 'node:module';
+import { createServer } from 'node:http';
+import { readFile, mkdir } from 'node:fs/promises';
+import { resolve,extname,sep } from 'node:path';
+const require=createRequire(process.env.PLAYWRIGHT_PACKAGE??import.meta.url);const {chromium}=require('playwright');
+export async function harness(){const root=resolve('dist');const server=createServer(async(req,res)=>{try{let file=resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(file===root)file=resolve(root,'index.html');if(!file.startsWith(root+sep)){res.writeHead(403).end();return;}res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.png':'image/png'})[extname(file)]??'application/octet-stream');res.end(await readFile(file));}catch{res.writeHead(404).end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;try{browser=await chromium.launch({headless:true,executablePath:process.env.EDGE_EXECUTABLE??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});}catch(e){server.close();throw e;}const context=await browser.newContext({viewport:{width:1920,height:925}});await mkdir('docs/screenshots',{recursive:true});const errors=[];context.on('page',page=>{page.on('pageerror',e=>errors.push(e.message));page.on('dialog',dialog=>dialog.accept());});return {context,errors,url:`http://127.0.0.1:${server.address().port}/index.html`,close:async()=>{await browser.close();server.close();}};}
+export const assert=(ok,message)=>{if(!ok)throw Error(message);};
+export async function wait(fn,message){for(let i=0;i<120;i++){if(await fn())return;await new Promise(r=>setTimeout(r,50));}throw Error(message);}
+export const documentOf=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('purrductivity.dashboard')));

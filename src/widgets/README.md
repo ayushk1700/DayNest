@@ -1,0 +1,1 @@
+All ten widget types are rendered through DashboardWidgets with shared movement/resize and rename/delete controls. Core content uses DraftField for conflict-aware autosave; local widgets have typed actions. See docs/local-widgets.md and docs/timing.md. Weather is a setup state until a provider is configured; it never fabricates live data.

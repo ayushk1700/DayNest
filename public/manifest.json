@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "DayNest",
+  "version": "0.1.0",
+  "description": "A calm, local productivity dashboard for your new tab.",
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; connect-src https://geocoding-api.open-meteo.com https://api.open-meteo.com"
+  },
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "optional_permissions": [
+    "notifications"
+  ],
+  "host_permissions": ["https://geocoding-api.open-meteo.com/*", "https://api.open-meteo.com/*"],
+  "background": {
+    "type": "module",
+    "service_worker": "background.js"
+  }
+}

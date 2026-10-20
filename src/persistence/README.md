@@ -1,0 +1,1 @@
+Storage chooses chrome.storage.local or browser localStorage, with same-origin Web Locks across tabs and worker. Invalid data is retained. Raw-data recovery backs up before replacement. Image bytes are separate IndexedDB records; cleanup protects live/recovery references and recent uploads. See docs/storage.md and docs/local-widgets.md.

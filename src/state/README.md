@@ -1,0 +1,1 @@
+Versioned v2 types, strict validation, v0/v1 migrations, conditional content/layout/local-widget actions, central external store and memory-only draft recovery. All writes go through the repository. Timer/display ticks are not persisted. See docs/storage.md, docs/timing.md and docs/local-widgets.md.
