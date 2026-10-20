@@ -1,5 +1,7 @@
 # Stage 9 verification
 
+Current evidence is recorded in [20 October stabilization](stabilization-2026-10-20.md), [package/skin verification](fix-verification-2026-10-20.md) and [P2/P3 follow-up](p2-p3-verification-2026-10-20.md). The chronological sections below retain their original test counts and historical results; use the dated follow-up for current menu, customization and installation status. These reports do not certify public release readiness.
+
 Initial audit: 18 October 2026. Latest follow-up: 19 October 2026. This is a local-development verification report, not an Edge Add-ons submission. Stage 10 packaging/handoff remains separate. The latest media/live-weather/background section below supersedes the earlier weather setup-only behavior.
 
 ## Automated checks

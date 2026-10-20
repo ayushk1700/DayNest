@@ -8,6 +8,7 @@ import { HabitTracker } from './HabitTracker';
 import { Calendar } from './Calendar';
 import { ImageWidget } from './ImageWidget';
 import { Weather } from './Weather';
+import { ScratchpadCard, WellbeingCard } from './InsightWidgets';
 
 import { WidgetFrame } from '../dashboard/WidgetFrame';
 import { Pomodoro } from './Pomodoro';
@@ -115,6 +116,8 @@ export function DashboardWidgets({ widgets }: {
 }
 
 export function WidgetContent({ widget }: { widget: Widget }): ReactNode {
+        if (widget.type === 'scratchpad') return <ScratchpadCard widget={widget}/>;
+        if (widget.type === 'wellbeing') return <WellbeingCard widget={widget}/>;
         if (widget.type === 'date')
             return <DateWidget widget={widget} header={<WidgetHeader widget={widget}/>}/>;
         if (widget.type === 'todo')

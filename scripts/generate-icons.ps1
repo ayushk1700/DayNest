@@ -16,6 +16,13 @@ try {
       $bitmap.Dispose()
     }
   }
+  Copy-Item -LiteralPath (Join-Path $iconDirectory 'icon-32.png') -Destination (Join-Path $iconDirectory 'daynest-favicon.png') -Force
+  # Embed the tab icon to avoid resolving an image against edge://newtab.
+  $iconData = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes((Join-Path $iconDirectory 'daynest-favicon.png')))
+  $htmlPath = Join-Path $PSScriptRoot '../index.html'
+  $html = [System.IO.File]::ReadAllText($htmlPath)
+  $html = [regex]::Replace($html, '(<link rel="icon"[^>]*href=")[^"]*(")', ('${1}data:image/png;base64,' + $iconData + '${2}'))
+  [System.IO.File]::WriteAllText($htmlPath, $html)
 } finally {
   $source.Dispose()
 }

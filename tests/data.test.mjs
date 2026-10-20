@@ -20,7 +20,7 @@ test('validation rejects corrupt, duplicate, oversized and mismatched content wi
 });
 test('migration accepts only the defined v0 shape and does not mutate its source',()=>{
  const {revision,...old}=legacySeed();old.schemaVersion=0;
- const result=migrateDashboard(old);assert.equal(result.schemaVersion,4);assert.equal(result.revision,0);assert.equal(old.schemaVersion,0);
+ const result=migrateDashboard(old);assert.equal(result.schemaVersion,6);assert.equal(result.revision,0);assert.equal(old.schemaVersion,0);
  assert.throws(()=>migrateDashboard({...old,extra:true}));
 });
 test('seed only when absent; saved empty layout remains empty',async()=>{
@@ -29,7 +29,7 @@ test('seed only when absent; saved empty layout remains empty',async()=>{
 });
 test('corrupt storage is retained; recovery creates a copy before replacement',async()=>{
  const {adapter,state}=memory('{invalid');const repo=new Repository(adapter);await assert.rejects(repo.load());assert.equal(state.raw,'{invalid');assert.equal(state.writes,0);
- await repo.recover('{invalid');assert.equal(state.backup,'{invalid');assert.equal(JSON.parse(state.raw).schemaVersion,4);
+ await repo.recover('{invalid');assert.equal(state.backup,'{invalid');assert.equal(JSON.parse(state.raw).schemaVersion,6);
 });
 test('recovery detects concurrent changes and write failures do not destroy original data',async()=>{
  const {adapter,state}=memory('newer');const repo=new Repository(adapter);await assert.rejects(repo.recover('older'));assert.equal(state.backup,undefined);assert.equal(state.raw,'newer');
@@ -80,7 +80,7 @@ test('extension adapter uses local storage and only forwards document change eve
 });
 test('validated legacy data migrates once inside the write lock',async()=>{
  const {revision,...legacy}=legacySeed();legacy.schemaVersion=0;const {state,adapter}=memory(JSON.stringify(legacy));const repo=new Repository(adapter);
- const migrated=await repo.load();assert.equal(migrated.schemaVersion,4);assert.equal(state.writes,1);await repo.load();assert.equal(state.writes,1);
+ const migrated=await repo.load();assert.equal(migrated.schemaVersion,6);assert.equal(state.writes,1);await repo.load();assert.equal(state.writes,1);
 });
 test('task-level independent edits merge; a stale deletion cannot remove changed content',async()=>{
  const {adapter}=memory(JSON.stringify(seedDashboard()));const repo=new Repository(adapter);const original=seedDashboard().widgets[0].content.tasks[0];
@@ -90,5 +90,6 @@ test('task-level independent edits merge; a stale deletion cannot remove changed
 });
 test('legacy migration through the current schema preserves content/layout/preferences and normalizes dormant legacy timers',()=>{
  const old=legacySeed();old.zoom=.75;old.widgets[1].content.text='Keep my notes';old.widgets[2].content.remainingMs=0;old.widgets[2].content.completedSessions=['legacy-record'];
- const next=migrateDashboard(old);assert.equal(next.schemaVersion,4);assert.equal(next.zoom,.75);assert.deepEqual(next.widgets[1].position,old.widgets[1].position);assert.equal(next.widgets[1].content.text,'Keep my notes');assert.equal(next.widgets[2].content.status,'idle');assert.equal(next.widgets[2].content.remainingMs,1500000);assert.equal(next.widgets[2].content.completedSessions[0].finishedAt,0);assert.equal(old.schemaVersion,1);
+ const next=migrateDashboard(old);assert.equal(next.schemaVersion,6);assert.equal(next.zoom,.75);assert.deepEqual(next.widgets[1].position,old.widgets[1].position);assert.equal(next.widgets[1].content.text,'Keep my notes');assert.equal(next.widgets[2].content.status,'idle');assert.equal(next.widgets[2].content.remainingMs,1500000);assert.equal(next.widgets[2].content.completedSessions[0].finishedAt,0);assert.equal(old.schemaVersion,1);
 });
+

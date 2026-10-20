@@ -2,7 +2,7 @@ import type { DashboardDocument, TimerContent, Reminder } from './model';
 import { availablePosition, arrangeLayout, recoveredLayout, createWidget, gestureLayout, minimums, snapLayout } from '../dashboard/layout';
 import type { CoreType, Layout, Viewport } from '../dashboard/layout';
 import { remainingMs } from '../timing/time';
-import { isAmbientNote } from './model';
+import { isAmbientNote, defaultWellbeingSettings } from './model';
 export type WorkspaceAction = {
     type: 'zoom';
     expected: number;
@@ -85,6 +85,7 @@ export function applyWorkspace(next: DashboardDocument, action: WorkspaceAction,
         if (next.widgets.some(w => w.id === action.id))
             conflict();
         const w = createWidget(action.kind, action.id);
+        if (w.type === 'wellbeing') next.wellbeingSettings ??= defaultWellbeingSettings();
         if (action.workspace !== undefined) {
             if (action.workspace !== 'ambient' || w.type !== 'sticky') throw Error('Invalid note workspace.');
             w.settings.workspace = action.workspace;

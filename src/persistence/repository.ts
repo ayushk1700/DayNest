@@ -1,3 +1,5 @@
+import { settleRecording, retainWellbeing } from '../timing/wellbeing';
+import { safeReplacement } from './restoration';
 import { reconcileDue, pendingEvents, setDelivery } from '../timing/time';
 import type { PendingEvent } from '../timing/time';
 import type { Delivery } from '../state/model';
@@ -71,9 +73,11 @@ export class Repository {
             const raw = await this.adapter.read();
             const current = decode(raw);
             if (JSON.stringify(current) !== JSON.stringify(expected)) throw new ConflictError();
-            const next = validateDashboard({ ...replacement, revision: current.revision + 1 });
+            const next = validateDashboard({ ...safeReplacement(replacement), revision: current.revision + 1 });
             // If backup or write fails, the existing dashboard stays intact.
-            await this.adapter.backup(raw);
+            const recovery = structuredClone(current);
+            settleRecording(recovery,Date.now());retainWellbeing(recovery,Date.now());
+            await this.adapter.backup(current.wellbeingHistory?.active.length ? JSON.stringify(recovery) : raw);
             await this.adapter.write(JSON.stringify(next));
             return next;
         });

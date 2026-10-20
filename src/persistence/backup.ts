@@ -1,3 +1,4 @@
+import { settleRecording, retainWellbeing } from '../timing/wellbeing';
 import type { DashboardDocument } from '../state/model';
 import { migrateDashboard } from '../state/validation';
 import { assetReferences, loadMedia, saveMedia, validateMediaHeader, videoMetadata, MAX_VIDEO_BYTES } from '../assets/images';
@@ -46,7 +47,9 @@ function base64(bytes: Uint8Array): string {
     for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
     return btoa(binary);
 }
-export async function exportBackup(dashboard: DashboardDocument): Promise<Backup> {
+export async function exportBackup(source: DashboardDocument): Promise<Backup> {
+    const dashboard = structuredClone(source);
+    settleRecording(dashboard,Date.now());retainWellbeing(dashboard,Date.now());
     const images: PortableImage[] = [];
     let encodedBytes = 0;
     for (const id of assetReferences(dashboard)) {

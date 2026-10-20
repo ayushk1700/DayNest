@@ -15,7 +15,7 @@ test('schema 3 migrates background defaults without mutating styles, dates, cont
     let old = applyAction(seedDashboard(), { type: 'createWidget', kind: 'date', id: 'date-test', view });
     old.schemaVersion = 3; delete old.background; old.widgets[0].pinned = true; old.widgets[0].appearance.borderColor = '#123456';
     const snapshot = structuredClone(old), next = migrateDashboard(old);
-    assert.equal(next.schemaVersion, 4); assert.deepEqual(next.background, emptyBackground());
+    assert.equal(next.schemaVersion,6); assert.deepEqual(next.background, emptyBackground());
     assert.deepEqual(next.widgets, old.widgets); assert.deepEqual(old, snapshot);
 });
 test('dashboard background is strict, conflict-safe, undoable and referenced for asset protection', () => {
@@ -95,3 +95,4 @@ test('configured weather provider uses only the two approved hosts and handles c
         await assert.rejects(requestWeather(configuredProvider, 'Rate limit fixture', new AbortController().signal, true), /busy/);
     } finally { globalThis.fetch = original; }
 });
+

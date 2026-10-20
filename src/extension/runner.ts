@@ -2,6 +2,7 @@ import { MissingDocumentError } from '../persistence/repository';
 import type { Repository } from '../persistence/repository';
 import { pendingEvents, nextDeadline } from '../timing/time';
 import type { ExtensionAPI } from './api';
+import { InvalidDataError } from '../state/validation';
 export const ALARM_NAME = 'purrductivity-next';
 export async function runBackground(repo: Repository, api: ExtensionAPI, now = Date.now()): Promise<void> {
     let doc;
@@ -9,7 +10,9 @@ export async function runBackground(repo: Repository, api: ExtensionAPI, now = D
         doc = await repo.reconcile(now);
     }
     catch (error) {
-        if (error instanceof MissingDocumentError) {
+        if (error instanceof MissingDocumentError || error instanceof InvalidDataError) {
+            // Only the dashboard can offer recovery for invalid saved data. Do not
+            // repeatedly wake on stale deadlines or overwrite it from the worker.
             await api.alarms.clear(ALARM_NAME);
             return;
         }

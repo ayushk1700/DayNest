@@ -24,7 +24,7 @@ export const fontStacks = {
     mono: "Consolas, 'Courier New', monospace",
     handwritten: "'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive",
 } as const;
-export const widgetTypeLabels: Record<WidgetType, string> = { video: 'Video', date: 'Date', todo: 'Todo List', notes: 'Notes', sticky: 'Sticky Note', pomodoro: 'Pomodoro Timer', reminder: 'Reminder', clock: 'Clock', habit: 'Habit Tracker', image: 'Image', calendar: 'Calendar', weather: 'Weather' };
+export const widgetTypeLabels: Record<WidgetType, string> = { scratchpad: 'Scratchpad', wellbeing: 'Wellbeing', video: 'Video', date: 'Date', todo: 'Todo List', notes: 'Notes', sticky: 'Sticky Note', pomodoro: 'Pomodoro Timer', reminder: 'Reminder', clock: 'Clock', habit: 'Habit Tracker', image: 'Image', calendar: 'Calendar', weather: 'Weather' };
 export function appearanceAttributes(style: CardAppearance) {
     return {
         'data-card-font': style.fontFamily || undefined,
@@ -91,3 +91,4 @@ export function cardVariables(style: CardAppearance): Record<string, string> {
     }
     return vars;
 }
+

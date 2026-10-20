@@ -23,7 +23,7 @@ export function Overlay({ children, onClose, modal = false, label, fullPage = fa
             root.inert = true;
         const panel = ref.current;
         if (panel) overlayStack.push(panel);
-        const items = () => Array.from(panel?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),a[href],[tabindex="0"]') ?? []).filter(el => el.getClientRects().length > 0 && !el.closest('[hidden],[inert]'));
+        const items = () => Array.from(panel?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),a[href],summary,[tabindex="0"]') ?? []).filter(el => {const closed=el.closest('details:not([open])');return el.getClientRects().length>0&&!el.closest('[hidden],[inert]')&&(!closed||closed.querySelector('summary')===el);});
         (items()[0] ?? panel)?.focus();
         const key = (e: KeyboardEvent) => {
             if (e.defaultPrevented || overlayStack.at(-1) !== panel) return;

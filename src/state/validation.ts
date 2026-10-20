@@ -141,7 +141,7 @@ function validateV3(input: unknown): Record<string, unknown> {
     validateV2(old);
     return structuredClone(d);
 }
-export function validateDashboard(input: unknown): DashboardDocument {
+function validateV4(input: unknown): Record<string, unknown> {
     const d = obj(input);
     exact(d, ['schemaVersion', 'revision', 'theme', 'zoom', 'appearance', 'background', 'widgets', ...['typeAppearance', 'presets', 'layoutAssistance'].filter(key => Object.hasOwn(d, key))]);
     if (Object.hasOwn(d, 'presets')) {
@@ -160,7 +160,7 @@ export function validateDashboard(input: unknown): DashboardDocument {
     if (Object.hasOwn(d, 'typeAppearance')) {
         const defaults = obj(d.typeAppearance);
         for (const [key, value] of Object.entries(defaults)) {
-            if (!(WIDGET_TYPES as readonly string[]).includes(key)) fail();
+            if (!(WIDGET_TYPES as readonly string[]).includes(key) || key === 'scratchpad' || key === 'wellbeing') fail();
             appearance(value);
         }
     }
@@ -195,10 +195,91 @@ export function validateDashboard(input: unknown): DashboardDocument {
         }
     }
     validateV3(old);
+    return structuredClone(d);
+}
+function graph(input: unknown): void {
+    const c = obj(input); exact(c, ['nodes', 'connections']);
+    if (!Array.isArray(c.nodes) || c.nodes.length > 200 || !Array.isArray(c.connections) || c.connections.length > 400) fail();
+    const nodes = new Set<string>(), connections = new Set<string>(), pairs = new Set<string>();
+    for (const input of c.nodes) {
+        const n = obj(input); exact(n, ['id', 'title', 'body', 'position', ...['width', 'height'].filter(key => Object.hasOwn(n, key))]);
+        const p = obj(n.position); exact(p, ['x', 'y']);
+        if (!id(n.id) || nodes.has(n.id as string) || typeof n.title !== 'string' || !n.title.trim() || n.title.length > 120 || typeof n.body !== 'string' || n.body.length > 4000 || !bounded(p.x, -100000, 100000) || !bounded(p.y, -100000, 100000) || (n.width !== undefined && !bounded(n.width, 160, 480)) || (n.height !== undefined && !bounded(n.height, 80, 400))) fail();
+        nodes.add(n.id as string);
+    }
+    for (const input of c.connections) {
+        const edge = obj(input); exact(edge, ['id', 'from', 'to']);
+        if (!id(edge.id) || connections.has(edge.id as string) || !nodes.has(edge.from as string) || !nodes.has(edge.to as string) || edge.from === edge.to) fail();
+        const pair = JSON.stringify([edge.from, edge.to].sort());
+        if (pairs.has(pair)) fail();
+        pairs.add(pair); connections.add(edge.id as string);
+    }
+}
+function validateV5(input: unknown): Record<string, unknown> {
+    const d = obj(input);
+    if (d.schemaVersion !== 5 || !Array.isArray(d.widgets) || new TextEncoder().encode(JSON.stringify(d)).length > 2100000) fail();
+    const old = structuredClone(d); old.schemaVersion = 4;
+    if (Object.hasOwn(old, 'wellbeingSettings')) {
+        const s = obj(old.wellbeingSettings); exact(s, ['recordingEnabled', 'retentionDays', 'startedAt']);
+        if (typeof s.recordingEnabled !== 'boolean' || (s.retentionDays !== 30 && s.retentionDays !== 90) || (s.startedAt !== null && !timestamp(s.startedAt))) fail();
+        delete old.wellbeingSettings;
+    }
+    if (Object.hasOwn(old, 'typeAppearance')) {
+        const defaults = obj(old.typeAppearance);
+        for (const type of ['scratchpad', 'wellbeing']) if (Object.hasOwn(defaults, type)) { appearance(defaults[type]); delete defaults[type]; }
+    }
+    for (const input of old.widgets as unknown[]) {
+        const w = obj(input);
+        if (w.type !== 'scratchpad' && w.type !== 'wellbeing') continue;
+        exact(obj(w.settings), []);
+        if (w.type === 'scratchpad') graph(w.content); else exact(obj(w.content), []);
+        // Reuse the complete existing metadata/appearance checks without relaxing v4.
+        w.type = 'notes'; w.settings = { ruled: false }; w.content = { text: '' };
+    }
+    validateV4(old);
+    return structuredClone(d);
+}
+export function validateDashboard(input: unknown): DashboardDocument {
+    const d = obj(input);
+    if (d.schemaVersion !== 6 || new TextEncoder().encode(JSON.stringify(d)).length > 2100000) fail();
+    const old = structuredClone(d); old.schemaVersion = 5; delete old.wellbeingHistory;
+    if (old.wellbeingSettings && Object.hasOwn(obj(old.wellbeingSettings),'dailyBreakGoal')) {
+        const s=obj(old.wellbeingSettings);if(s.dailyBreakGoal!==null&&(!bounded(s.dailyBreakGoal,1,20)||!Number.isInteger(s.dailyBreakGoal)))fail();delete s.dailyBreakGoal;
+    }
+    validateV5(old);
+    const settings = d.wellbeingSettings === undefined ? null : obj(d.wellbeingSettings);
+    if (settings?.recordingEnabled && (settings.startedAt === null || !d.wellbeingHistory)) fail();
+    if (d.wellbeingHistory !== undefined) {
+        if (!settings) fail();
+        const h = obj(d.wellbeingHistory); exact(h,['intervals','completions','active','storageLimited']);
+        if (!Array.isArray(h.intervals) || h.intervals.length > 1000 || !Array.isArray(h.completions) || h.completions.length > 1000 || !Array.isArray(h.active) || h.active.length > 100 || typeof h.storageLimited !== 'boolean') fail();
+        const ids = new Set<string>(), activeIds = new Set<string>();
+        const spans = new Map<string, {from:number;to:number}[]>();
+        const common = (e:Record<string,unknown>) => {if (!id(e.widgetId) || !id(e.sessionId) || (e.phase !== 'work' && e.phase !== 'break') || !validTimeZone(e.timeZone)) fail();};
+        const span = (e:Record<string,unknown>, end:unknown) => {
+            if (!timestamp(e.from) || !timestamp(end) || Number(end) <= Number(e.from) || Number(end)-Number(e.from) > 86400000 || settings.startedAt === null || Number(e.from) < Number(settings.startedAt)) fail();
+            const key = String(e.widgetId), list = spans.get(key) ?? []; list.push({from:Number(e.from),to:Number(end)}); spans.set(key,list);
+        };
+        for (const value of h.intervals) {
+            const e = obj(value); exact(e,['id','widgetId','sessionId','phase','from','to','timeZone']);common(e);span(e,e.to);
+            if (e.id !== e.widgetId+':'+e.sessionId+':'+e.from+':'+e.to || ids.has(String(e.id))) fail();ids.add(String(e.id));
+        }
+        for (const value of h.completions) {
+            const e = obj(value);exact(e,['id','widgetId','sessionId','phase','at','timeZone']);common(e);
+            if (!timestamp(e.at) || settings.startedAt === null || Number(e.at) < Number(settings.startedAt) || e.id !== e.widgetId+':'+e.sessionId+':'+e.phase || ids.has(String(e.id))) fail();ids.add(String(e.id));
+        }
+        for (const value of h.active) {
+            const e = obj(value);exact(e,['widgetId','sessionId','phase','from','deadline','timeZone']);common(e);span(e,e.deadline);
+            const w = (d.widgets as Record<string,unknown>[]).find(w=>w.id===e.widgetId), t = w && obj(w.content);
+            if (!settings.recordingEnabled || activeIds.has(String(e.widgetId)) || w?.type !== 'pomodoro' || !t || t.status !== 'running' || t.sessionId !== e.sessionId || t.phase !== e.phase || t.deadline !== e.deadline || t.timeZone !== e.timeZone) fail();activeIds.add(String(e.widgetId));
+        }
+        for (const list of spans.values()) {list.sort((a,b)=>a.from-b.from);for(let i=1;i<list.length;i++)if(list[i].from<list[i-1].to)fail();}
+    }
     return structuredClone(d) as unknown as DashboardDocument;
 }
 export function migrateDashboard(input: unknown): DashboardDocument {
     let d = obj(input);
+    if (typeof d.schemaVersion === 'number' && d.schemaVersion > 6) throw new InvalidDataError('This dashboard was saved by a newer DayNest version. Update the extension to open it. Saved data was retained.');
     if (d.schemaVersion === 0) {
         exact(d, ['schemaVersion', 'theme', 'zoom', 'widgets']);
         d = { ...d, schemaVersion: 1, revision: 0 };
@@ -220,7 +301,13 @@ export function migrateDashboard(input: unknown): DashboardDocument {
         const old = validateV2(d);
         return migrateDashboard({ ...old, schemaVersion: 3, appearance: emptyAppearance(), widgets: (old.widgets as Record<string, unknown>[]).map(w => ({ ...w, appearance: emptyAppearance(), pinned: false })) });
     }
-    if (d.schemaVersion === 3) return validateDashboard({ ...validateV3(d), schemaVersion: 4, background: emptyBackground() });
+    if (d.schemaVersion === 3) return migrateDashboard({ ...validateV3(d), schemaVersion: 4, background: emptyBackground() });
+    if (d.schemaVersion === 4) return migrateDashboard({ ...validateV4(d), schemaVersion: 5 });
+    if (d.schemaVersion === 5) {
+        const old = validateV5(d);
+        if (old.wellbeingSettings) old.wellbeingSettings = {...obj(old.wellbeingSettings), recordingEnabled:false, startedAt:null};
+        return validateDashboard({...old,schemaVersion:6});
+    }
     return validateDashboard(d);
 }
 export function decodeDashboard(raw: string): DashboardDocument {

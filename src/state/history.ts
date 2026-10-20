@@ -6,7 +6,9 @@ import { remainingMs } from '../timing/time';
 
 export interface Patch {
     widgetId?: string;
-    field: 'theme' | 'zoom' | 'appearance' | 'typeAppearance' | 'presets' | 'layoutAssistance' | 'presentation' | 'background' | 'pinned' | 'widget' | 'title' | 'position' | 'size' | 'settings' | 'content';
+    entityId?: string;
+    collection?: 'nodes' | 'connections';
+    field: 'wellbeingSettings' | 'theme' | 'zoom' | 'appearance' | 'typeAppearance' | 'presets' | 'layoutAssistance' | 'presentation' | 'background' | 'pinned' | 'widget' | 'title' | 'position' | 'size' | 'settings' | 'content';
     before: unknown;
     after: unknown;
 }
@@ -31,6 +33,15 @@ export function diff(before: DashboardDocument, after: DashboardDocument): Patch
         const a = before.widgets.find(w => w.id === id), b = after.widgets.find(w => w.id === id);
         if (!a || !b) { patches.push({ widgetId: id, field: 'widget', before: a, after: b }); continue; }
         for (const field of ['title', 'position', 'size', 'settings', 'content', 'appearance', 'pinned', 'presentation'] as const) {
+            if (field === 'content' && a.type === 'scratchpad' && b.type === 'scratchpad') {
+                for (const collection of ['nodes', 'connections'] as const) {
+                    for (const entityId of new Set([...a.content[collection], ...b.content[collection]].map(e => e.id))) {
+                        const old = a.content[collection].find(e => e.id === entityId), value = b.content[collection].find(e => e.id === entityId);
+                        if (!equal(old, value)) patches.push({widgetId:id, field:'content', collection, entityId, before:old, after:value});
+                    }
+                }
+                continue;
+            }
             if (field === 'content' && a.type === 'pomodoro') continue;
             if (!equal(comparable(a[field], { field }), comparable(b[field], { field })))
                 patches.push({ widgetId: id, field, before: a[field], after: b[field] });
@@ -51,16 +62,26 @@ function safeRestoredWidget(widget: Widget, now: number): Widget {
 }
 export function applyPatches(source: DashboardDocument, patches: Patch[], now = Date.now()): DashboardDocument {
     const next = structuredClone(source);
+    if (patches.some(p=>p.field==='wellbeingSettings')) throw new ConflictError();
     for (const patch of patches) {
         if (!patch.widgetId) {
-            if (patch.field !== 'theme' && patch.field !== 'zoom' && patch.field !== 'appearance' && patch.field !== 'background' && patch.field !== 'typeAppearance' && patch.field !== 'presets' && patch.field !== 'layoutAssistance') throw new ConflictError();
+            if (patch.field !== 'theme' && patch.field !== 'zoom' && patch.field !== 'appearance' && patch.field !== 'background' && patch.field !== 'typeAppearance' && patch.field !== 'presets' && patch.field !== 'layoutAssistance' && patch.field !== 'wellbeingSettings') throw new ConflictError();
             if (!equal(next[patch.field], patch.before)) throw new ConflictError();
-            if ((patch.field === 'typeAppearance' || patch.field === 'presets' || patch.field === 'layoutAssistance') && patch.after === undefined) delete next[patch.field];
+            if ((patch.field === 'typeAppearance' || patch.field === 'presets' || patch.field === 'layoutAssistance' || patch.field === 'wellbeingSettings') && patch.after === undefined) delete next[patch.field];
             else Object.assign(next, { [patch.field]: structuredClone(patch.after) });
             continue;
         }
         const index = next.widgets.findIndex(w => w.id === patch.widgetId);
         const w = next.widgets[index];
+        if (patch.collection && patch.entityId) {
+            if (!w || w.type !== 'scratchpad') throw new ConflictError();
+            const list = w.content[patch.collection];
+            if (!equal(list.find(e => e.id === patch.entityId), patch.before)) throw new ConflictError();
+            const filtered = list.filter(e => e.id !== patch.entityId);
+            if (patch.after !== undefined) filtered.push(structuredClone(patch.after) as never);
+            Object.assign(w.content, {[patch.collection]:filtered});
+            continue;
+        }
         if (patch.field === 'widget') {
             if (!equal(comparable(w, patch), comparable(patch.before, patch))) throw new ConflictError();
             if (patch.after === undefined) next.widgets.splice(index, 1);
@@ -70,7 +91,7 @@ export function applyPatches(source: DashboardDocument, patches: Patch[], now = 
                 else next.widgets.push(restored);
             }
         } else {
-            if (!w || patch.field === 'theme' || patch.field === 'zoom' || patch.field === 'background' || patch.field === 'typeAppearance' || patch.field === 'presets' || patch.field === 'layoutAssistance' || !equal(comparable(w[patch.field], patch), comparable(patch.before, patch))) throw new ConflictError();
+            if (!w || patch.field === 'theme' || patch.field === 'zoom' || patch.field === 'background' || patch.field === 'typeAppearance' || patch.field === 'presets' || patch.field === 'layoutAssistance' || patch.field === 'wellbeingSettings' || !equal(comparable(w[patch.field], patch), comparable(patch.before, patch))) throw new ConflictError();
             if (w.pinned && (patch.field === 'position' || patch.field === 'size')) throw new ConflictError('This card is pinned. Unpin it before changing its layout.');
             const value = structuredClone(patch.after);
             if (w.type === 'reminder' && patch.field === 'content') {
@@ -95,7 +116,7 @@ export class History {
     undo: Entry[] = [];
     redo: Entry[] = [];
     record(change: Change, action: Action, at = Date.now()) {
-        if (action.type === 'front' || action.type === 'timer') return;
+        if (action.type === 'front' || action.type === 'timer' || action.type === 'wellbeingSettings' || action.type === 'clearWellbeing') return;
         const patches = diff(change.before, change.after);
         if (!patches.length) return;
         const key = ['text', 'rename', 'editTask', 'imageCaption', 'weatherCity', 'zoom'].includes(action.type) ? JSON.stringify([action.type, 'widgetId' in action ? action.widgetId : '', 'taskId' in action ? action.taskId : '']) : '';
@@ -114,3 +135,4 @@ export class History {
     }
     clear() { this.undo = []; this.redo = []; }
 }
+

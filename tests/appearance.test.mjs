@@ -13,7 +13,7 @@ const layouts=d=>d.widgets.map(w=>({id:w.id,layout:{position:w.position,size:w.s
 test('v2 migration adds independent appearance/pin defaults without changing existing content or layout',()=>{
  const d=seedDashboard();d.schemaVersion=2;delete d.appearance;delete d.background;for(const w of d.widgets){delete w.appearance;delete w.pinned;}
  d.zoom=.75;d.widgets[1].content.text='Saved before customization';const raw=JSON.stringify(d),next=decodeDashboard(raw);
- assert.equal(next.schemaVersion,4);assert.equal(next.zoom,.75);assert.equal(next.widgets[1].content.text,d.widgets[1].content.text);assert.deepEqual(next.widgets[1].position,d.widgets[1].position);assert.deepEqual(next.appearance,emptyAppearance());assert.equal(next.widgets[1].pinned,false);assert.equal(JSON.stringify(d),raw);
+ assert.equal(next.schemaVersion,6);assert.equal(next.zoom,.75);assert.equal(next.widgets[1].content.text,d.widgets[1].content.text);assert.deepEqual(next.widgets[1].position,d.widgets[1].position);assert.deepEqual(next.appearance,emptyAppearance());assert.equal(next.widgets[1].pinned,false);assert.equal(JSON.stringify(d),raw);
  next.widgets[0].appearance.borderColor='#123456';assert.equal(next.widgets[1].appearance.borderColor,null);assert.equal(next.appearance.borderColor,null);
 });
 test('appearance validation rejects CSS injection, unknown fields, coerced enums and malformed pin state',()=>{
@@ -43,3 +43,4 @@ test('styles and pins are undoable, portable and cannot let old geometry history
 test('custom backgrounds choose readable foreground, muted, accent and primary colors across the RGB grid',()=>{
  for(let r=0;r<=255;r+=51)for(let g=0;g<=255;g+=51)for(let b=0;b<=255;b+=51){const bg='#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');const vars=cardVariables({...emptyAppearance(),backgroundColor:bg});for(const key of ['--card-text','--card-muted','--card-accent'])assert.ok(contrast(bg,vars[key])>=4.5,`${bg} ${key}`);assert.ok(contrast(vars['--card-accent'],vars['--card-on-accent'])>=4.5);}
 });
+

@@ -13,3 +13,7 @@ Reminders capture the device timezone at save time and store a real timestamp. D
 Only storage and alarms are required. The notifications permission is optional and requested only from the explicit Settings button. No host permission, remote service or API key is used. Alarms can be delayed after sleep and do not guarantee alerts while Edge or the computer is closed. Missed state is reconciled at startup. Ordinary preview has no background alarms or OS notifications and reconciles when a dashboard is open/returns.
 
 References: [Alarms API](https://developer.chrome.com/docs/extensions/reference/api/alarms), [Notifications API](https://developer.chrome.com/docs/extensions/reference/api/notifications), [Optional permissions](https://developer.chrome.com/docs/extensions/reference/api/permissions).
+
+## Optional Wellbeing recording (schema 6)
+
+After explicit opt-in, a separate shared ledger seals actual running segments on pause/reset/deletion and at a due timer deadline. Active markers use the same document lock as timer actions and background reconciliation; stable completion IDs prevent replay. Recording pause/resume omits gaps, and imports pause recording. Live display intervals are read-only. See insight-stage-3.md and wellbeing-privacy-support.md.

@@ -47,6 +47,9 @@ export function verifyBuild(root = 'dist') {
   assert.deepEqual(manifest.host_permissions, ['https://geocoding-api.open-meteo.com/*', 'https://api.open-meteo.com/*']);
   assert.equal(manifest.content_security_policy.extension_pages, "script-src 'self'; object-src 'none'; base-uri 'none'; connect-src https://geocoding-api.open-meteo.com https://api.open-meteo.com");
   const html = readFileSync(`${root}/index.html`, 'utf8');
+  const favicon = html.match(/<link\s+rel="icon"[^>]+href="data:image\/png;base64,([^"]+)"/);
+  assert(favicon, 'Expected embedded DayNest tab icon');
+  assert.deepEqual(Buffer.from(favicon[1], 'base64'), readFileSync(`${root}/icons/daynest-favicon.png`), 'Tab icon must match the packaged sunflower');
   assert(!/<script[^>]+src=["']https?:/i.test(html));
   const entries = [...html.matchAll(/(?:src|href)="(\.\/assets\/[^"?#]+)"/g)];
   assert(entries.length > 0, 'Expected bundled assets');

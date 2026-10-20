@@ -64,7 +64,7 @@ export function AppearanceControls({ widgetId, widgetIds, chooseTarget = false, 
     const live = batch ? widget?.appearance : type ? doc.typeAppearance?.[type] ?? emptyAppearance() : selected ? widget?.appearance : doc.appearance;
     const [base, setBase] = useState(() => structuredClone(live ?? emptyAppearance()));
     const [draft, setDraft] = useState(() => structuredClone(live ?? emptyAppearance()));
-    const [saving, setSaving] = useState(false), [error, setError] = useState(''), [message, setMessage] = useState('');
+    const [saving, setSaving] = useState(false), [pinBusy, setPinBusy] = useState(false), [error, setError] = useState(''), [message, setMessage] = useState('');
     const dirty = batch ? touched.length > 0 : !same(draft, base);
     useEffect(() => { if (!dirty && !saving && live && !same(live, base)) { setBase(structuredClone(live)); setDraft(structuredClone(live)); } }, [live, dirty, saving, base]);
     const disabled = saving || state.pending > 0 || state.status !== 'ready' || !live;
@@ -99,6 +99,11 @@ export function AppearanceControls({ widgetId, widgetIds, chooseTarget = false, 
         }}><option value="">Global defaults · all widget types</option>{advanced && <optgroup label="Widget-type defaults">{WIDGET_TYPES.map(t => <option value={`type:${t}`} key={t}>{widgetTypeLabels[t]}</option>)}</optgroup>}<optgroup label="Individual widgets">{doc.widgets.map(w => <option value={w.id} key={w.id}>{w.title || 'Untitled'} · {widgetTypeLabels[w.type]}</option>)}</optgroup></select></label>}
         <p className="appearance-help">Theme → Global defaults → Widget-type defaults → Individual widget. Only explicit overrides are saved. Preview changes below, then Save or Cancel.</p>
         {!live && <p role="alert">This widget was removed. Close this editor or select another scope.</p>}
+        {!batch && widget && <label className="appearance-inherit"><input type="checkbox" aria-label="Pin position and size" checked={widget.pinned} disabled={disabled || pinBusy} onChange={event => {
+            const value = event.target.checked;
+            setPinBusy(true); setError('');
+            void dashboardStore.dispatch({ type: 'pin', widgetId: widget.id, expected: widget.pinned, value }).catch(e => setError(e.message)).finally(() => setPinBusy(false));
+        }}/>Pin position and size <small>Saved immediately. Unpin an off-screen card here before using Recover widgets.</small></label>}
         <div className="appearance-preview-area" aria-label="Live appearance preview"><div className="appearance-preview-caption">Live preview · {widgetTypeLabels[sampleType]}{!widget && ' inheriting these defaults'}</div><div className="appearance-preview-window" style={{ minHeight: sample.size.height + 24 }}><WidgetFrame widget={sample} narrow zoom={1} preview appearanceOverride={resolution.value}><WidgetContent widget={sample}/></WidgetFrame></div><p className="appearance-help">Paper, photo and clock skins stay intact until you override their appearance. System fonts work offline. Opacity is kept high enough for readable text; reduced transparency uses an opaque surface.</p></div>
         {(advanced ? fields : [{ name: 'Appearance', fields: fields[1].fields.filter(f => ['borderColor', 'backgroundColor', 'borderWidth', 'corners', 'shadow'].includes(f.key)) }]).map(section => <fieldset className="appearance-section-fields" key={section.name} disabled={disabled}><legend>{section.name}</legend><button type="button" className="appearance-section-reset" onClick={() => { mark(section.fields.map(f => f.key)); setDraft(old => cleared(old, section.fields.map(f => f.key))); setMessage(''); }}>Reset {section.name.toLowerCase()}</button><div className="appearance-field-grid">{section.fields.map(f => {
             const mixed = batch && !touched.includes(f.key) && batchSnapshots.some(value => value[f.key] !== batchSnapshots[0]?.[f.key]);

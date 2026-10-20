@@ -63,6 +63,24 @@ test('future deadlines schedule one alarm; overdue reminders are delivered once'
 test('a fresh installation with no dashboard quietly clears its alarm without seeding',async()=>{
  let queue=Promise.resolve();const adapter={read:async()=>undefined,write:async()=>{throw Error('Must not seed');},backup:async()=>{},subscribe:()=>()=>{},exclusive:fn=>{const p=queue.then(fn);queue=p.catch(()=>{});return p;}};const mock=apiMock();await runBackground(new Repository(adapter),mock.api);assert.deepEqual(mock.clears,[ALARM_NAME]);
 });
+
+test('invalid saved data pauses background alarms without writes, claims or notifications; valid updates resume',async()=>{
+ let raw=JSON.stringify({...seedDashboard(),background:{assetId:null,fit:'cover',dim:'invalid'}});
+ const original=raw;let writes=0;
+ const adapter={read:async()=>raw,write:async value=>{writes++;raw=value;},backup:async()=>{throw Error('Must not replace recovery data');},subscribe:()=>()=>{},exclusive:fn=>fn()};
+ const repo=new Repository(adapter),mock=apiMock();
+ await runBackground(repo,mock.api);await runBackground(repo,mock.api);
+ assert.equal(raw,original);assert.equal(writes,0);assert.equal(mock.sent.length,0);assert.equal(mock.alarms.length,0);assert.deepEqual(mock.clears,[ALARM_NAME,ALARM_NAME]);
+ const now=Date.now();raw=JSON.stringify(running(now));
+ await runBackground(repo,mock.api,now);
+ assert.equal(mock.alarms.length,1);assert.equal(mock.alarms[0].name,ALARM_NAME);
+});
+
+test('background storage failures still surface instead of being mistaken for invalid data',async()=>{
+ const mock=apiMock();const failure=Error('Storage unavailable');
+ await assert.rejects(runBackground({reconcile:async()=>{throw failure;}},mock.api),error=>error===failure);
+ assert.equal(mock.clears.length,0);
+});
 test('a reminder with notifications disabled is reconciled without an OS alert',async()=>{
  let d=applyAction(seedDashboard(),{type:'createWidget',kind:'reminder',id:'quiet',view:{width:1600,height:900}});d.widgets.find(w=>w.id==='quiet').settings.notify=false;d=applyAction(d,{type:'upsertReminder',widgetId:'quiet',expected:null,value:{id:'quiet-reminder',eventId:'quiet-event',message:'In-app only',dueAt:0,timeZone:'UTC',delivery:'pending'}});const {repo,raw}=memory(d);const mock=apiMock();await runBackground(repo,mock.api);assert.equal(mock.sent.length,0);assert.equal(raw().widgets.find(w=>w.id==='quiet').content.reminders[0].delivery,'unavailable');
 });

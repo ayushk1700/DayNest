@@ -1,9 +1,15 @@
+import { beginRecordingTimer, settleRecording, retainWellbeing } from '../timing/wellbeing';
+import { emptyWellbeingHistory } from './model';
+import type { WellbeingHistory } from './model';
+import { applyGraph } from './graph-actions';
+import type { GraphAction } from './graph-actions';
 import { applyLocal } from './local-actions';
 import type { LocalAction } from './local-actions';
 import { applyWorkspace } from './workspace-actions';
 import type { WorkspaceAction } from './workspace-actions';
 import type { DashboardDocument, Task, Widget, WidgetType, Theme, CardAppearance, DashboardBackground } from './model';
-import { emptyAppearance, WIDGET_TYPES } from './model';
+import { emptyAppearance, WIDGET_TYPES, defaultWellbeingSettings } from './model';
+import type { WellbeingSettings } from './model';
 import { validateDashboard } from './validation';
 import { applyStyleAction } from './style-actions';
 import type { StyleAction } from './style-actions';
@@ -55,14 +61,25 @@ export type ContentAction = {
     expected: string;
     value: 'yellow' | 'pink' | 'green';
 };
-export type Action = StyleAction | ContentAction | WorkspaceAction | LocalAction | { type: 'background'; expected: DashboardBackground; value: DashboardBackground } | { type: 'theme'; expected: Theme; value: Theme } | { type: 'appearance'; widgetId?: string; widgetType?: WidgetType; expected: CardAppearance; value: CardAppearance } | { type: 'pin'; widgetId: string; expected: boolean; value: boolean };
+export type Action = {type:'clearWellbeing';expected:WellbeingHistory|null} | GraphAction | { type: 'wellbeingSettings'; expected: WellbeingSettings; value: WellbeingSettings } | StyleAction | ContentAction | WorkspaceAction | LocalAction | { type: 'background'; expected: DashboardBackground; value: DashboardBackground } | { type: 'theme'; expected: Theme; value: Theme } | { type: 'appearance'; widgetId?: string; widgetType?: WidgetType; expected: CardAppearance; value: CardAppearance } | { type: 'pin'; widgetId: string; expected: boolean; value: boolean };
 const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 function expect(a: unknown, b: unknown) {
     if (!equal(a, b))
         throw new ConflictError();
 }
-export function applyAction(source: DashboardDocument, action: Action, now = Date.now()): DashboardDocument {
+function applyCore(source: DashboardDocument, action: Action, now = Date.now()): DashboardDocument {
     const next = structuredClone(source);
+    if (action.type === 'graphNode' || action.type === 'graphConnection') {
+        applyGraph(next, action, () => { throw new ConflictError(); });
+        next.revision++;
+        try { return validateDashboard(next); }
+        catch { throw new ConflictError('This idea change exceeds a storage limit or contains an invalid connection. Check the idea and try again.'); }
+    }
+    if (action.type === 'wellbeingSettings') {
+        expect(next.wellbeingSettings ?? defaultWellbeingSettings(), action.expected);
+        next.wellbeingSettings = structuredClone(action.value);
+        next.revision++; return validateDashboard(next);
+    }
     if (action.type === 'presets' || action.type === 'layoutAssistance' || action.type === 'presentation' || action.type === 'appearanceBatch' || action.type === 'align') {
         applyStyleAction(next, action, message => { throw new ConflictError(message); });
         next.revision++; return validateDashboard(next);
@@ -166,5 +183,35 @@ function applyContent(next: DashboardDocument, action: ContentAction): Dashboard
         }
     }
     next.revision += 1;
+    return validateDashboard(next);
+}
+
+
+export function applyAction(source: DashboardDocument, action: Action, now = Date.now()): DashboardDocument {
+    const base = structuredClone(source);
+    if (action.type === 'wellbeingSettings' || action.type === 'clearWellbeing') {
+        if (action.type === 'wellbeingSettings') {expect(base.wellbeingSettings ?? defaultWellbeingSettings(), action.expected);if(action.value.startedAt!==(base.wellbeingSettings?.startedAt??null))throw new ConflictError('The recording start date is managed by DayNest.');}
+        else expect(base.wellbeingHistory ?? null, action.expected);
+        settleRecording(base,now);
+        if (action.type === 'clearWellbeing') {
+            base.wellbeingHistory = emptyWellbeingHistory();
+            base.wellbeingSettings ??= defaultWellbeingSettings();
+            base.wellbeingSettings.startedAt = base.wellbeingSettings.recordingEnabled ? now : null;
+        } else {
+            base.wellbeingSettings = {...action.value,startedAt:base.wellbeingSettings?.startedAt ?? (action.value.recordingEnabled ? now : null)};
+            if (action.value.recordingEnabled) base.wellbeingHistory ??= emptyWellbeingHistory();
+        }
+        for (const w of base.widgets) beginRecordingTimer(base,w.id,now);
+        retainWellbeing(base,now);
+        if(action.type==='wellbeingSettings'&&action.value.recordingEnabled&&!base.wellbeingSettings?.recordingEnabled)throw new ConflictError('There is not enough local storage to record timer history. Export a backup and free some space before trying again.');
+        base.revision++;
+        try {return validateDashboard(base);} catch {throw new ConflictError('There is not enough space to begin recording, or these settings are invalid. Your saved data was kept.');}
+    }
+    const timerId = action.type === 'timer' ? action.widgetId : action.type === 'deleteWidget' && action.expected.type === 'pomodoro' ? action.widgetId : null;
+    if (timerId) settleRecording(base,now,timerId);
+    retainWellbeing(base,now);
+    const next = applyCore(base,action,now);
+    if (action.type === 'timer') beginRecordingTimer(next,action.widgetId,now);
+    retainWellbeing(next,now);
     return validateDashboard(next);
 }

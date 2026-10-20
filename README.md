@@ -123,6 +123,10 @@ Choose a new filename for each package. The script preserves existing packages, 
 <details>
 <summary><strong>Verification and everyday limits</strong></summary>
 
+## Scratchpad and Wellbeing
+
+Two new compact cards open accessible expanded views. Scratchpad includes a local linked-idea canvas with editing, draggable nodes, connections, search, pan/zoom and a keyboard-friendly list view. Wellbeing optionally records actual local timer-running intervals and completions, with Today/7-day/30-day charts, a user-set break goal and honest empty states. Existing completion counts are never converted to hours. Saved v0–v5 documents migrate to schema 6 without inserting cards or changing existing content. See [Stage 1 checks](docs/insight-stage-1.md) and [Stage 2 implementation and checks](docs/insight-stage-2.md).
+
 ## What has been checked
 
 The 20 October 2026 release pass includes:
@@ -188,3 +192,6 @@ Questions, ideas or a rough edge? **[aayush31500@outlook.com](mailto:aayush31500
 *Small steps count. So do the pauses in between.*
 
 </div>
+
+
+See [Stage 3 implementation](docs/insight-stage-3.md) and [Wellbeing privacy/support](docs/wellbeing-privacy-support.md).

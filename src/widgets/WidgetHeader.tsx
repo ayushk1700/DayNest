@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import type { Widget } from '../state/model';
 import { dashboardStore, useDashboard } from '../state/store';
@@ -11,7 +12,8 @@ import { WidgetMenu } from '../ui/WidgetMenu';
 import { Overlay } from '../ui/Overlay';
 import { DraftField } from '../ui/DraftField';
 import { WidgetSkinControls } from './WidgetSkinControls';
-export function WidgetHeader({ widget }: {
+export function WidgetHeader({ widget, leading, subtitle, tools: headerTools }: {
+    leading?: ReactNode; subtitle?: ReactNode; tools?: ReactNode;
     widget: Widget;
 }) {
     const [rename, setRename] = useState(false);
@@ -25,7 +27,7 @@ export function WidgetHeader({ widget }: {
         if (rename) Array.from(document.querySelectorAll<HTMLInputElement>(`[data-widget-id="${widget.id}"] .rename-editor input`)).find(input => !input.closest('[inert]'))?.focus();
     }, [rename, widget.id]);
     return <>
-    <div className="widget-heading" tabIndex={0} role="group" aria-label={widget.pinned ? `Pinned ${widget.title || widget.type}; unpin in card menu to move or resize` : `Move ${widget.title || widget.type}; arrows move, Alt arrows resize`}><h2>{widget.title || 'Untitled widget'}</h2><WidgetMenu title={widget.title || widget.type}><div className="card-menu-group"><LayoutControl widget={widget}/>
+    <div className="widget-heading" tabIndex={0} role="group" aria-label={widget.pinned ? `Pinned ${widget.title || widget.type}; unpin in card menu to move or resize` : `Move ${widget.title || widget.type}; arrows move, Alt arrows resize`}>{leading}{subtitle ? <div className="insight-heading-copy"><h2>{widget.title || 'Untitled widget'}</h2>{subtitle}</div> : <h2>{widget.title || 'Untitled widget'}</h2>}{headerTools}<WidgetMenu title={widget.title || widget.type}><div className="card-menu-group"><LayoutControl widget={widget}/>
       <IconButton icon="customize" caption="Customize" label={`Customize ${widget.title || widget.type}`} onClick={() => setCustomizing(true)}/>
       </div>{tools.advanced && <><div className="card-menu-group"><IconButton icon="customize" caption="Copy appearance" label={`Copy appearance of ${widget.title || widget.type}`} onClick={() => {
           const frame = Array.from(document.querySelectorAll<HTMLElement>(`[data-widget-id="${widget.id}"]`)).find(el => !el.closest('[inert]'));

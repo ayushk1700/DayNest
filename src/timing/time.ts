@@ -1,3 +1,4 @@
+import { reconcileRecording } from './wellbeing';
 import type { DashboardDocument, TimerContent, Delivery } from '../state/model';
 export function remainingMs(timer: TimerContent, now: number): number { return timer.status === 'running' ? Math.max(0, timer.deadline! - now) : timer.remainingMs; }
 const dateFormats = new Map<string, Intl.DateTimeFormat>();
@@ -5,7 +6,7 @@ export function localDate(at: number, timeZone: string): string { if (!dateForma
     dateFormats.set(timeZone, new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' })); const parts = dateFormats.get(timeZone)!.formatToParts(new Date(at)); return ['year', 'month', 'day'].map(type => parts.find(p => p.type === type)!.value).join('-'); }
 export function completedToday(timer: TimerContent, now: number, timeZone: string): number { const today = localDate(now, timeZone); return timer.completedSessions.filter(r => localDate(r.finishedAt, timeZone) === today).length; }
 export function reconcileDue(doc: DashboardDocument, now: number): boolean {
-    let changed = false;
+    let changed = reconcileRecording(doc, now);
     for (const w of doc.widgets)
         if (w.type === 'pomodoro' && w.content.status === 'running' && w.content.deadline! <= now) {
             const t = w.content;

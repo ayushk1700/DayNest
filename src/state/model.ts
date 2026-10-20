@@ -60,7 +60,15 @@ export interface Task {
     text: string;
     completed: boolean;
 }
+export interface IdeaNode { id: string; title: string; body: string; position: { x: number; y: number }; width?: number; height?: number; }
+export interface IdeaConnection { id: string; from: string; to: string; }
+export interface ScratchpadContent { nodes: IdeaNode[]; connections: IdeaConnection[]; }
+export interface WellbeingSettings {
+    dailyBreakGoal?: number | null; recordingEnabled: boolean; retentionDays: 30 | 90; startedAt: number | null; }
+export const defaultWellbeingSettings = (): WellbeingSettings => ({ recordingEnabled: false, retentionDays: 90, startedAt: null });
 export interface ContentMap {
+    scratchpad: ScratchpadContent;
+    wellbeing: Record<string, never>;
     video: { assetId: string | null; caption: string };
     date: Record<string, never>;
     todo: {
@@ -108,6 +116,8 @@ export const NOTE_SKINS = ['plain', 'lined', 'grid', 'dotted', 'kraft'] as const
 export type NoteSkin = typeof NOTE_SKINS[number];
 export function noteSkin(settings: { ruled: boolean; skin?: NoteSkin }): NoteSkin { return settings.skin ?? (settings.ruled ? 'lined' : 'plain'); }
 export interface SettingsMap {
+    scratchpad: Record<string, never>;
+    wellbeing: Record<string, never>;
     video: { fit: 'cover' | 'contain' };
     date: Record<string, never>;
     todo: {
@@ -146,7 +156,7 @@ export interface SettingsMap {
     };
 }
 export type WidgetType = keyof ContentMap;
-export const WIDGET_TYPES = ['video', 'date', 'todo', 'notes', 'sticky', 'pomodoro', 'reminder', 'clock', 'habit', 'image', 'calendar', 'weather'] as const satisfies readonly WidgetType[];
+export const WIDGET_TYPES = ['video', 'date', 'todo', 'notes', 'sticky', 'pomodoro', 'reminder', 'clock', 'habit', 'image', 'calendar', 'weather', 'scratchpad', 'wellbeing'] as const satisfies readonly WidgetType[];
 export type Widget = {
     [K in WidgetType]: {
         id: string;
@@ -170,7 +180,7 @@ export type Widget = {
 }[WidgetType];
 export const isAmbientNote = (widget: Widget): boolean => widget.type === 'sticky' && widget.settings.workspace === 'ambient';
 export interface DashboardDocument {
-    schemaVersion: 4;
+    schemaVersion: 6;
     revision: number;
     theme: Theme;
     zoom: number;
@@ -179,13 +189,21 @@ export interface DashboardDocument {
     presets?: AppearancePreset[];
     layoutAssistance?: LayoutAssistance;
     background: DashboardBackground;
+    wellbeingSettings?: WellbeingSettings;
+    wellbeingHistory?: WellbeingHistory;
     widgets: Widget[];
 }
 export function seedDashboard(): DashboardDocument {
-    return { schemaVersion: 4, revision: 0, theme: 'Ocean Breeze', zoom: 1, appearance: emptyAppearance(), background: emptyBackground(), widgets: [
+    return { schemaVersion: 6, revision: 0, theme: 'Ocean Breeze', zoom: 1, appearance: emptyAppearance(), background: emptyBackground(), widgets: [
             { ...cardDefaults(), id: 'todo-initial', type: 'todo', title: 'Todo List', position: { x: 58, y: 84 }, size: { width: 356, height: 486 }, zIndex: 0, settings: { showCompleted: true }, content: { tasks: [{ id: 'task-initial', text: 'Be happy', completed: false }] } },
             { ...cardDefaults(), id: 'notes-initial', type: 'notes', title: 'Notes (titles are changeable)', position: { x: 490, y: 122 }, size: { width: 469, height: 375 }, zIndex: 1, settings: { ruled: false }, content: { text: 'DayNest - track everything on one page!' } },
             { ...cardDefaults(), id: 'pomodoro-initial', type: 'pomodoro', title: 'Pomodoro Timer', position: { x: 996, y: 122 }, size: { width: 319, height: 263 }, zIndex: 2, settings: { workMinutes: 25, breakMinutes: 5 }, content: idleTimer() },
             { ...cardDefaults(), id: 'sticky-initial', type: 'sticky', title: 'Sticky Note', position: { x: 845, y: 415 }, size: { width: 150, height: 150 }, zIndex: 3, settings: { color: 'yellow' }, content: { text: 'Keep track of your scattered thoughts - stickies can go anywhere!' } },
         ] };
 }
+
+export interface WellbeingInterval { id: string; widgetId: string; sessionId: string; phase: 'work' | 'break'; from: number; to: number; timeZone: string; }
+export interface WellbeingCompletion { id: string; widgetId: string; sessionId: string; phase: 'work' | 'break'; at: number; timeZone: string; }
+export interface WellbeingActive { widgetId: string; sessionId: string; phase: 'work' | 'break'; from: number; deadline: number; timeZone: string; }
+export interface WellbeingHistory { intervals: WellbeingInterval[]; completions: WellbeingCompletion[]; active: WellbeingActive[]; storageLimited: boolean; }
+export const emptyWellbeingHistory = (): WellbeingHistory => ({intervals:[],completions:[],active:[],storageLimited:false});

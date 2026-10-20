@@ -1,3 +1,4 @@
+import { safeReplacement } from '../persistence/restoration';
 import { useEffect, useRef, useState } from 'react';
 import type { DashboardDocument } from '../state/model';
 import { seedDashboard } from '../state/model';
@@ -8,7 +9,6 @@ import type { Backup } from '../persistence/backup';
 import { Icon } from '../ui/Icon';
 import { IconButton } from '../ui/IconButton';
 import { Overlay } from '../ui/Overlay';
-import { remainingMs } from '../timing/time';
 
 export interface Replacement { kind: 'import' | 'reset' | 'recovery'; expected: DashboardDocument; backup?: Backup; }
 export function BackupControls({ onReview }: { onReview: (review: Replacement) => void }) {
@@ -46,18 +46,6 @@ export function BackupControls({ onReview }: { onReview: (review: Replacement) =
     {drafts.length > 0 && <p role="status">Finish saving or download your unsaved drafts before backup, history, or replacement.</p>}
     {busy && <p role="status">Preparing your backup…</p>}{message && <p role="status">{message}</p>}</section>;
 }
-function safeReplacement(source: DashboardDocument): DashboardDocument {
-    const doc = structuredClone(source), now = Date.now();
-    for (const widget of doc.widgets) {
-        if (widget.type === 'pomodoro') {
-            const t = widget.content;
-            if (t.status === 'running') { t.remainingMs = Math.max(1, remainingMs(t, now)); t.status = 'paused'; t.deadline = null; }
-            if (t.delivery === 'pending' || t.delivery === 'claimed') t.delivery = 'unavailable';
-        }
-        if (widget.type === 'reminder') for (const r of widget.content.reminders) if (r.dueAt <= now || r.delivery === 'claimed') r.delivery = 'unavailable';
-    }
-    return doc;
-}
 export function ReplacementDialog({ review, onClose }: { review: Replacement; onClose: () => void }) {
     const drafts = useDrafts();
     const [busy, setBusy] = useState(false), [error, setError] = useState('');
@@ -67,7 +55,7 @@ export function ReplacementDialog({ review, onClose }: { review: Replacement; on
     return <Overlay modal label={title} onClose={close}><h1>{title}?</h1><IconButton icon="close" label={`Close ${title}`} className="close" disabled={busy} onClick={close}/>
         <p className="confirm-copy">{review.kind === 'reset' ? 'Replace every widget, task, note, photo/video placement, timer, reminder, habit, and calendar event with the sample dashboard. Background, card styles and pins return to defaults. Theme and zoom return to Ocean Breeze and 100%.' : 'Replace the current content, layout, background, card styles, pins, theme, and zoom with this backup.'} A recovery copy of the current dashboard is saved first. Browser notification permission stays as it is. Undo history is cleared.</p>
         <div className="backup-preview"><strong>{preview.widgets.length} widgets · {preview.theme} · {Math.round(preview.zoom * 100)}%</strong><p>{review.backup?.images.length ?? 0} media files included · {preview.widgets.filter(w => w.pinned).length} pinned cards</p><ul>{preview.widgets.map(w => <li key={w.id}>{w.title || 'Untitled widget'} <span>({w.type}{w.pinned ? ', pinned' : ''})</span></li>)}</ul></div>
-        {review.kind !== 'reset' && <p className="confirm-copy">Restored running timers are paused. Past reminders stay visible without replaying old notifications.</p>}
+        {review.kind !== 'reset' && <p className="confirm-copy">Restored running timers are paused. Past reminders stay visible without replaying old notifications. Wellbeing recording is paused; previously saved intervals are retained, and in-progress intervals are not replayed.</p>}
         {drafts.length > 0 && <p role="alert">Save or download your unsaved drafts first.</p>}{error && <p role="alert" className="local-error">{error}</p>}
         <div className="confirm-actions"><button className="small" disabled={busy} onClick={close}>Cancel</button><button className="primary" disabled={busy || drafts.length > 0} onClick={() => {
             setBusy(true); setError('');

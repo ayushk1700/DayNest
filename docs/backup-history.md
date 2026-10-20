@@ -1,6 +1,6 @@
 # Themes, history, backup and reset
 
-Six themes are saved in the dashboard document. Shared tokens style the canvas, cards, text, controls, borders, focus and error states. Ocean Breeze remains the default. The yellow sticky keeps dark text in every theme.
+Twelve themes are saved in the dashboard document. Shared tokens style the canvas, cards, text, controls, borders, focus and error states. Ocean Breeze remains the default. The yellow sticky keeps dark text in every theme.
 
 ## History
 
@@ -14,7 +14,7 @@ Any tab retaining history holds a shared `purrductivity-history-assets` Web Lock
 
 ## Portable JSON format
 
-The version-1 envelope has exactly `format`, `version`, `exportedAt`, `dashboard` and `images` fields. `format` is `purrductivity-backup`. The dashboard keeps its schema version (currently 4), content, preferences, layout and asset IDs. Each referenced photo, video or dashboard image appears once as `{ id, type, width, height, data }`, with `data` containing plain base64 bytes. PNG/JPEG/WebP images and MP4/WebM videos are allowed. The legacy envelope field remains named images, and up to 101 unique references cover 100 widgets plus one global background. Maximum backup size is 50 MiB; images retain the 5 MiB limit, and videos are limited to 25 MiB and five minutes with supported codecs. Export reports an error rather than omitting oversized or missing media.
+The version-1 envelope has exactly `format`, `version`, `exportedAt`, `dashboard` and `images` fields. `format` is `purrductivity-backup`. The dashboard keeps its schema version (currently 6), content, preferences, layout and asset IDs. Each referenced photo, video or dashboard image appears once as `{ id, type, width, height, data }`, with `data` containing plain base64 bytes. PNG/JPEG/WebP images and MP4/WebM videos are allowed. The legacy envelope field remains named images, and up to 101 unique references cover 100 widgets plus one global background. Maximum backup size is 50 MiB; images retain the 5 MiB limit, and videos are limited to 25 MiB and five minutes with supported codecs. Export reports an error rather than omitting oversized or missing media.
 
 Import validates the file extension/MIME, size, JSON shape, known versions/migrations, document limits, unique/matching image IDs, base64, signatures, actual image/video metadata decoding and dimensions, video duration, and role/type consistency (background/photo references cannot point to video bytes) before showing the preview. Bare known dashboard schemas are also accepted if they have no image references. A document-only file cannot recreate missing image bytes.
 
@@ -37,3 +37,7 @@ Card customization update: appearance defaults/overrides and pins are included i
 
 
 Schema 4 update: the global background is a conditional history field, with asset ID, cover/contain fit and softness. Video references and the background participate in current/recovery/history asset protection. Import remaps their IDs as well as image-card IDs. Existing schema-3 documents migrate with an empty background and keep all prior widgets, styles and pins. Binary bytes remain outside the document/history; live weather responses are not included in backups.
+
+## Optional Wellbeing history
+
+Recording settings, clear and automatic timer records stay outside undo. Wellbeing card deletion keeps shared history. Export snapshots running progress into a copy; import/restore pauses timers and recording, removes active markers and never replays historical events. See wellbeing-privacy-support.md for retention, local deletion and backup copies.
