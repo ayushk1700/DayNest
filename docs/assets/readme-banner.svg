@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="300" viewBox="0 0 1280 300" role="img" aria-labelledby="title">
+<title id="title">DayNest — a little room for your day</title>
+<rect width="1280" height="300" rx="24" fill="#faf5e9"/>
+<circle cx="1110" cy="68" r="140" fill="#f1d994" opacity=".55"/>
+<circle cx="1190" cy="295" r="185" fill="#dce1c9"/>
+<path d="M1010 320 Q1040 200 1160 150 M1070 240 Q1000 190 1000 140 Q1090 155 1070 240 M1110 195 Q1110 115 1190 105 Q1190 175 1110 195" fill="#a4af87" stroke="#7e8b64" stroke-width="4"/>
+<text x="80" y="70" fill="#8a7550" font-family="Segoe UI,Arial,sans-serif" font-size="15" letter-spacing="5">YOUR PERSONAL NEW-TAB SPACE</text>
+<text x="76" y="164" fill="#48533b" font-family="Georgia,serif" font-size="88">DayNest</text>
+<text x="82" y="216" fill="#6a705e" font-family="Segoe UI,Arial,sans-serif" font-size="26">A little room for your day.</text>
+<path d="M82 256 H305" stroke="#cbaa60" stroke-width="3" stroke-linecap="round"/>
+</svg>

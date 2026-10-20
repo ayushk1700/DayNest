@@ -1,19 +1,95 @@
+<div align="center">
+
+<img src="docs/assets/readme-banner.svg" alt="DayNest — a little room for your day" width="100%" />
+
+<img src="public/icons/daynest-sunflower.png" alt="DayNest pixel sunflower" width="72" />
+
 # DayNest
 
-A local Microsoft Edge New Tab dashboard using React, strict TypeScript, Vite and Manifest V3. Stages 1 through 9 are implemented. Verification evidence and remaining manual checks are recorded in docs/release-checklist.md.
+### Make space for what matters.
 
-## Run and build
-Requires Node 22.12+ (or Node 24) and pnpm 10+.
+A calm, personal new-tab dashboard for Microsoft Edge.<br />
+For your scattered thoughts, your next small step, and a little sunshine.
+
+**🌱 Private beta &nbsp; · &nbsp; 🔒 Local storage &nbsp; · &nbsp; 🧩 12 widgets &nbsp; · &nbsp; 🎨 12 themes**
+
+[Product website](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site) · [Privacy](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site/privacy.html) · [Get help](mailto:aayush31500@outlook.com)
+
+<img src="docs/screenshots/release-2026-10-20/01-your-day.png" alt="DayNest Warm Earth dashboard with tasks, notes, a focus timer, clock and sticky note. Illustrative demo content." width="100%" />
+
+*Less tab-hopping. More headspace.*
+
+</div>
+
+---
+
+## Your little corner of the browser
+
+| Catch the thought | Make a little progress | Make it yours |
+| --- | --- | --- |
+| Notes, to-dos and sticky notes | Pomodoro, reminders, habits and calendar | Twelve themes, paper styles and personal media |
+| A home for loose ends and ideas | Focus on the next small thing | Move, resize, customize and pin your widgets |
+
+Clock, Date, Weather, Image and Video widgets complete the workspace. Weather includes current conditions and a seven-day forecast from Open-Meteo.
+
+## A mood for every kind of day
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/release-2026-10-20/02-after-hours.png" alt="DayNest after-hours dashboard" width="100%" /></td>
+<td width="50%"><img src="docs/screenshots/release-2026-10-20/03-make-it-yours.png" alt="DayNest appearance customization" width="100%" /></td>
+</tr>
+<tr>
+<td align="center"><b>After hours</b><br /><sub>A softer space to wind down.</sub></td>
+<td align="center"><b>Made for you</b><br /><sub>Your colors. Your layout. Your rhythm.</sub></td>
+</tr>
+</table>
+
+*Screenshots show the app with illustrative demo content.*
+
+## 🔒 A small space. Your own.
+
+- **No account, ads or built-in analytics.** Your dashboard and uploaded media stay in your browser profile.
+- **Local widgets work offline.** Weather needs internet and sends your city search and resolved coordinates to Open-Meteo.
+- **Portable backups.** Export and import JSON backups that include your uploaded images and videos.
+- **Room to change your mind.** Undo up to 50 actions in the current tab; replacement and reset operations preserve one previous-dashboard recovery copy.
+
+There is no automatic cloud sync. Back up important dashboards before uninstalling or moving to a new browser profile. Backups are not encrypted by DayNest.
+
+## 🌻 Settle into your new tab
+
+DayNest is not yet published in the Edge Add-ons store. Request beta access at **[aayush31500@outlook.com](mailto:aayush31500@outlook.com?subject=DayNest%20beta%20access)**.
+
+For a local developer installation:
+
+1. Build the extension using the commands below.
+2. Open `edge://extensions` and enable **Developer mode**.
+3. Choose **Load unpacked** and select this project's **dist** folder.
+4. Accept Edge's new-tab change prompt if shown and open a fresh tab.
+5. After rebuilding, select **Reload** on DayNest's extension card. Keep the same installation path to preserve its extension identity and local data.
+
+> Export a backup from **Settings → Export JSON** before changing installations. A store installation can have a different identity from an unpacked development copy; import your backup into the new installation when needed.
+
+<details>
+<summary><strong>Developer setup · build and run</strong></summary>
+
+## Build and run
+
+Requires **Node 22.12+** and **pnpm 11.25.0**. Windows with Node 24 is the verified development environment.
 
 ```sh
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
-pnpm build
-pnpm test
-pnpm preview
 ```
 
-Build before running tests. Production output is `dist/`. If pnpm is unavailable but dependencies are installed:
+```sh
+pnpm build
+pnpm test
+```
+
+The extension package is built into `dist/`. Run `pnpm preview` for a local browser preview. Preview storage is separate from installed-extension storage.
+
+If pnpm is unavailable and dependencies are already installed:
 
 ```sh
 node node_modules/typescript/bin/tsc --noEmit
@@ -22,77 +98,93 @@ node scripts/verify-build.mjs
 node scripts/run-tests.mjs
 ```
 
-## Install or update in Edge
-1. Build, open `edge://extensions`, and enable **Developer mode**.
-2. Choose **Load unpacked**, selecting this project's **dist** directory.
-3. Open a new tab and accept Edge's New Tab change confirmation if prompted. Another extension or managed policy may take precedence.
-4. After rebuilding, click **Reload** on the extension card and open fresh dashboard tabs. Keep the same installation directory for updates.
+</details>
 
-Required permissions are **storage**, **alarms**, and access to the two Open-Meteo API hosts for live weather. System **notifications** are optional, enabled explicitly in Settings. Weather sends your entered city to geocoding-api.open-meteo.com and the resolved coordinates to api.open-meteo.com. No GPS/geolocation permission, secret key, account or cloud synchronization is used. Photos, videos and background images remain local. Code, fonts and icons are bundled.
+## 📦 Release files
 
-## Use the workspace
-- Drag widget headers or resize from the lower-right corner. Focus a header and use arrows to move, Alt + arrows to resize and Shift for fine steps. The three-dot card menu offers **Layout**, **Rename**, and **Delete**. Hover over the dots, click them, or focus them and press Enter/Arrow Down. **Layout** offers numeric controls. Geometry and stacking order persist.
-- **Arrange Widgets** wraps cards into rows; **Recover widgets** in Settings restores reachable headers. The four-corner toolbar button enters fullscreen; click it again or press Escape to exit. Narrow windows use a readable flow layout while retaining desktop geometry. Settings zoom scales the canvas; toolbar, dialogs and picker stay unscaled.
-- The compact 44px plus button opens a two-column picker for all twelve widget types, with small outline icons, soft hover states and independent multiple instances. Short windows scroll only the choices; the heading and close button stay visible.
-- Todo: Enter/plus adds, Space toggles a focused checkbox, row controls edit/delete. **Clear all tasks** confirms removal of both completed and unfinished tasks.
-- Notes and Sticky Notes: edit directly; a small three-dot menu appears on card hover or keyboard focus. Text autosaves after 350ms; conflicting drafts stay visible with explicit choices and download. Wait for **Saved on this device** before leaving.
-- Sticky Notes use warm textured paper, handwritten text, rounded corners, a turned lower-right corner and a soft shadow. Existing text, dimensions, colors and pins are retained; custom background colors keep their readable foregrounds.
-- Pomodoro: Start/Pause/Resume/Reset, work/break transitions and Timer settings. Reset keeps completed work history. Deadlines survive closed tabs and browser restart; daily totals use local dates.
-- Reminder: create/edit/delete messages and due times. Upcoming/passed states use real timestamps with saved timezone. Enable optional alerts in Settings. Alerts can be delayed after sleep or closure; state reconciles on startup.
-- Clock: choose Simple, Digital alarm clock or Rounded analog from the card's **Clock style** selector, or in Customize. The cream LCD and sage analog faces show live local device time; each card keeps its own style and 12/24-hour choice. The alarm-clock design is a clock face; use Reminder for alerts.
-- Notes paper: choose Plain, Lined, Grid, Dotted or Kraft from the card's **Notes paper** selector, or in Customize. Paper changes preserve text, autosave, card colors and geometry.
-- Date: a separate warm typographic banner with the current local day, ordinal ending and month. It updates at midnight and after waking, with no saved or hardcoded date.
-- Habit Tracker: add/delete habits, toggle daily completion and inspect the last seven local days; older history stays stored.
-- Calendar: a soft cream/cyan month view with outlined event days, a monthly agenda and stacked year badge. Previous/next month, Today, arrow-key date movement, Sunday/Monday week starts and event edit/delete controls work locally. No remote calendar connection.
-- Image: Polaroid paper frame, handwritten caption and compact photo controls on hover/focus (always visible on touch). Upload local PNG/JPEG/WebP up to 5 MiB with contain/crop-to-fill display. Bytes live separately in IndexedDB. Invalid uploads retain the previous image; cleanup protects recent uploads, recovery references and live undo history.
-- Video: a Polaroid player for local MP4/WebM clips up to **25 MiB and five minutes**, with supported browser codecs, captions, fit, play/pause/seek and fullscreen controls. Video bytes stay in IndexedDB and are included in backups/recovery. Nothing autoplays.
-- Weather: current conditions and a real seven-day high/low forecast from Open-Meteo. Enter a city and country for an unambiguous match. Celsius/Fahrenheit conversion is local; responses are cached for 15 minutes, with refresh and online/focus reconciliation. Failed refreshes retain the last displayed reading and label the failure. Forecast dates follow the selected city's timezone.
+| File | Purpose |
+| --- | --- |
+| [Extension ZIP](release/daynest-0.1.0-candidate.zip) | Version 0.1.0 candidate; extract before loading in Edge |
+| [SHA-256 checksum](release/daynest-0.1.0-candidate.zip.sha256) | Verify the candidate archive |
+| [Beta kit](release/daynest-0.1.0-beta-kit.zip) | Candidate extension and tester instructions |
+| [Manual testing checklist](release/manual-testing-checklist.md) | Remaining device and browser checks |
+| [Store assets](release/store-assets/) | Product screenshots and listing logo |
 
-## Storage and recovery
-DayNest retains the original internal storage keys, asset database, alarms and backup format so existing dashboards, media, recovery copies and JSON backups continue to work after the rename. Keep the same unpacked extension directory when updating.
+Extract the extension ZIP to a stable folder. In `edge://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the extracted folder containing `manifest.json`. This is a candidate build, not a store-certified release.
 
-The installed extension uses chrome.storage.local; ordinary preview uses localStorage at its exact origin. Each has a separate IndexedDB image database. Keep the same preview address/port to see the same preview data. Schema migration preserves existing content and layout. Previously saved zoom now applies to the canvas; new dashboards start at 100 percent.
+To package a fresh build on Windows, run `pnpm build`, then:
 
-Only missing data seeds samples. Empty saved content remains empty. Invalid data opens recovery instead of being overwritten. **Download saved data** retains the raw saved value; confirmed **Back up and restore samples** writes a recovery copy before replacement. The most recent copy is under purrductivity.recovery. Unknown recovery data conservatively prevents image cleanup.
-
-Unsaved drafts are memory-only. Dirty editors warn before supported page exits; closing/removing a dirty editor keeps a downloadable draft on that page. Download it before leaving. Notification delivery uses at-most-once claims: interruption between claim and OS popup may miss a notification but does not duplicate a work completion. Browser/computer closure does not guarantee an immediate alert.
-
-**Settings > Recommended full themes** offers Warm Earth, Midnight, Ocean Breeze, Forest Green, Soft Sunset, Lavender, Paper & Ink, Sakura, Matcha, Nordic Snow, Vintage Sepia and Peach Cream. Wide gradient previews follow the reference order. Existing Dark Mode and Sunset data remains compatible and highlights Midnight and Soft Sunset.
-
-Twelve recommended themes, per-tab undo/redo, portable JSON backups with photos/videos/background images, import previews, confirmed reset and recovery are implemented. History keeps up to 50 user actions until reload or replacement; timer commands and notification delivery stay outside history. Settings offers Restore previous dashboard. Backups remain limited to 50 MiB, so several large videos may exceed that limit. Stage 10 packaging and store handoff remain separate.
-
-Settings also offers global and per-card border/background colors, border width, corners and shadow. **Dashboard background** accepts a local PNG/JPEG/WebP image up to 5 MiB, with fit and softness controls; choose **Save background** to apply it. The image participates in Undo/Redo, portable backups and recovery. Each card menu offers Customize and Pin in place; translucent, torn washi tape appears at the upper-left of pinned cards. Pinned cards keep their position and size during dragging, resizing, Arrange and Recover. See docs/card-customization.md.
-
-The top-right toolbar has only Settings. Reset Dashboard and Restore previous dashboard are inside Settings. Compact three-dot card menus open on hover, click or keyboard. Canvas scrollbars are hidden; content uses small rounded thumbs revealed on hover/focus, with wheel/touch/keyboard scrolling retained. Tape press, photo glow, weather icon motion and the small Add-button paw respect reduced-motion preferences.
-
-## Verification
-Strict TypeScript, build/package checks and 70 tests pass. Browser checks include real drag/resize at multiple zooms, two-tab conflict handling, local widgets, date rollover, invalid-data recovery, media and offline operation. An isolated unpacked Edge profile verified actual New Tab override, service worker/alarm delivery with the dashboard closed, browser restart reconciliation and offline image/widget persistence. The latest installed-extension check fetched genuine Open-Meteo current conditions/forecast and verified video playback/background persistence after a profile restart offline. Real Windows popup rendering and physical sleep/resume are unverified.
-
-The latest Date/Weather layouts and Polaroid/sticky presentations passed an isolated Edge check, including actual Add Widget creation, local midnight rollover, saved weather units/city, pinning, desktop/narrow layouts and menus, image upload/caption controls and sticky editing. Captures are in docs/screenshots. See docs/release-checklist.md for the full verification scope.
-
-Optional Playwright checks after building:
-
-```sh
-node scripts/check-ui.mjs
-node scripts/check-content.mjs
-node scripts/check-workspace.mjs
-node scripts/check-local-widgets.mjs
-node scripts/check-widget-skins.mjs
-node scripts/check-fullscreen.mjs
-node scripts/check-extension.mjs
-node scripts/check-settings-history.mjs
-node scripts/check-card-menu.mjs
-node scripts/check-customization.mjs
-node scripts/check-date-weather.mjs
-node scripts/fetch-video-fixture.mjs
-node scripts/check-media-weather-background.mjs
-node scripts/check-installed-media-weather.mjs
-node scripts/check-weather-live.mjs
+```powershell
+./release/package-extension.ps1 -OutputName 'daynest-0.1.0-local.zip'
 ```
 
-Playwright must be installed or PLAYWRIGHT_PACKAGE must point to its package.json. EDGE_EXECUTABLE overrides the default Windows Edge path. These checks use isolated profiles, not your personal dashboard.
+Choose a new filename for each package. The script preserves existing packages, checks archived files against `dist/`, and writes checksum and metadata files alongside the ZIP.
 
-See [Stage 9 verification](docs/release-checklist.md), [backup/history format and limits](docs/backup-history.md), [Stage 5–6 report](docs/stages-5-6-verification.md), [Stage 7 report](docs/stage-7-verification.md), [storage](docs/storage.md), [timing](docs/timing.md), [local widgets and image lifecycle](docs/local-widgets.md), and [reference specification](docs/ui-spec.md). Captures are in docs/screenshots.
+<details>
+<summary><strong>Verification and everyday limits</strong></summary>
 
-## Assets
-Placeholder cat-face extension icons are local PNGs at 16/32/48/128 pixels in public/icons; replace at the same sizes/names and rebuild. scripts/generate-icons.ps1 regenerates them. The legacy public/avatar.svg asset is no longer displayed. Flaticon Uicons is bundled locally, with attribution in Settings and license at public/licenses/flaticon.txt. See docs/backup-history.md for history/backup limits and the portable JSON format.
+## What has been checked
+
+The 20 October 2026 release pass includes:
+
+- Strict TypeScript, self-contained production package validation and **93 automated tests**.
+- Isolated installed Edge checks for the sunflower tab favicon, browser restart, background alarms, invalid-data preservation and recovery.
+- Browser checks for multiple tabs, conflict handling, backup/import, reset recovery, local media, offline behavior and twelve theme contrast checks.
+- Keyboard focus containment/return, narrow layouts, forced-colors and reduced-motion emulation.
+- A 100-widget, 1.47 MB dashboard load test and a 4.86 MB image upload/reload test.
+- A dependency advisory audit reporting no known vulnerabilities at the time checked.
+
+These are scoped checks, not a complete accessibility or platform certification. **Physical sleep/resume, genuine Windows notification popups, NVDA, physical touch, external beta feedback and store certification remain open.** See the [release report](docs/public-release-2026-10-20.md) for evidence and limits.
+
+## Everyday details
+
+| Item | Current behavior |
+| --- | --- |
+| Images | PNG, JPEG or WebP; up to 5 MiB each |
+| Videos | Supported MP4/WebM; up to 25 MiB and five minutes |
+| Backups | Up to 50 MiB; can contain personal text and uploaded media |
+| History | Up to 50 actions per tab; clears on reload/replacement |
+| Recovery | One previous dashboard; reset is not a full secure erase |
+| Notifications | Optional; the browser, Windows, sleep and shutdown can delay or suppress them |
+| Weather | Open-Meteo public endpoint; non-commercial terms and rate limits apply |
+
+Long-term pricing is undecided. A commercial launch requires an appropriate weather-service arrangement or a change to the weather feature. Do not put a paid service's secret API key in a distributed extension.
+
+</details>
+
+## 🌐 Visit DayNest
+
+Visit the **[DayNest website](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site)** for the product overview and beta information.
+
+- [Privacy policy](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site/privacy.html)
+- [Support](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site/support.html)
+- [Website source](website/daynest/dist/index.html)
+
+## Find your way around
+
+| Guide | What you will find |
+| --- | --- |
+| [Release report](docs/public-release-2026-10-20.md) | Current evidence, unresolved gates and next steps |
+| [Developer guide](docs/developer-guide.md) | Detailed behavior, workflows and earlier verification |
+| [Storage and recovery](docs/storage.md) | Persistence, validation, migrations and recovery |
+| [Backups and history](docs/backup-history.md) | Export/import and undo contracts |
+| [Weather provider](docs/weather-provider.md) | Requests, caching, attribution and provider terms |
+| [Beta plan](release/beta-plan.md) | Tester tasks and feedback collection |
+| [Store listing](release/store-listing.md) | Prepared copy, permissions and certification notes |
+| [Website source](website/daynest/dist/index.html) | Product, privacy and support pages |
+
+## Credits and support
+
+The sunflower is DayNest's pixel-art brand icon, created from the supplied sunflower reference. UI icons are **[Flaticon Uicons](https://www.flaticon.com/uicons)**, with visible credit in Settings. React and React DOM use the MIT license. Weather data is provided by **[Open-Meteo](https://open-meteo.com/)** under CC BY 4.0; API service terms apply separately. See [third-party notices](public/licenses/third-party.txt) and the [Flaticon license](public/licenses/flaticon.txt).
+
+Questions, ideas or a rough edge? **[aayush31500@outlook.com](mailto:aayush31500@outlook.com)**. Please remove private dashboard content from screenshots and do not email full backups by default.
+
+<div align="center">
+
+---
+
+<img src="public/icons/icon-32.png" alt="" width="24" />
+
+*Small steps count. So do the pauses in between.*
+
+</div>
