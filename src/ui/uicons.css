@@ -1,0 +1,2 @@
+@font-face{font-family:PurrUicons;src:url('./vendor/uicons-regular-rounded.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}
+.uicon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;font:normal normal 20px/1 PurrUicons;flex-shrink:0;text-transform:none;-webkit-font-smoothing:antialiased}

@@ -3,6 +3,7 @@
   "name": "DayNest",
   "version": "0.1.0",
   "description": "A calm, local productivity dashboard for your new tab.",
+  "action": { "default_popup": "equalizer.html", "default_title": "DayNest Music Equalizer" },
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
@@ -13,16 +14,22 @@
     "128": "icons/icon-128.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; connect-src https://geocoding-api.open-meteo.com https://api.open-meteo.com"
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; connect-src 'self' https://geocoding-api.open-meteo.com https://api.open-meteo.com"
   },
   "permissions": [
     "storage",
-    "alarms"
+    "alarms",
+    "scripting",
+    "activeTab",
+    "tabCapture",
+    "offscreen"
   ],
   "optional_permissions": [
-    "notifications"
+    "notifications",
+    "tabs"
   ],
-  "host_permissions": ["https://geocoding-api.open-meteo.com/*", "https://api.open-meteo.com/*"],
+  "host_permissions": ["https://geocoding-api.open-meteo.com/*", "https://api.open-meteo.com/*", "https://music.youtube.com/*"],
+  "content_scripts": [{"matches": ["https://music.youtube.com/*"], "js": ["music-content.js"], "run_at": "document_idle"}],
   "background": {
     "type": "module",
     "service_worker": "background.js"

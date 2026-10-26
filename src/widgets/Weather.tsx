@@ -8,14 +8,13 @@ import { useNow } from '../timing/hooks';
 import { addDays, dayKey, parseDay } from './dates';
 import { configuredProvider, dateInZone, requestWeather, weatherCondition } from '../weather/provider';
 import type { WeatherSnapshot } from '../weather/provider';
+import { Icon, type Name as IconName } from '../ui/Icon';
 
 function WeatherSymbol({ code }: { code: number }) {
-    const sun = code <= 1, snow = code >= 71 && code <= 77 || code === 85 || code === 86;
-    return <svg className="weather-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        {sun ? <><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></>
-            : snow ? <path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 3 3-3M9 20l3-3 3 3M3 10l4-1-1-4M21 14l-4 1 1 4M3 14l4 1-1 4M21 10l-4-1 1-4"/>
-                : <><path d="M6 16a4 4 0 0 1-.3-8 6 6 0 0 1 11.5 0A4 4 0 1 1 18 16Z"/>{code >= 51 && <path d={code >= 95 ? 'm13 15-3 4h4l-3 4' : 'm8 19-1 2m6-2-1 2m6-2-1 2'}/>}</>}
-    </svg>;
+    const snow = code >= 71 && code <= 77 || code === 85 || code === 86;
+    const rain = code >= 51;
+    const name: IconName = code >= 0 && code <= 1 ? 'sun' : snow ? 'snowflake' : rain ? 'rain' : 'weather';
+    return <Icon name={name} className="weather-symbol"/>;
 }
 export function Weather({ widget, header }: { widget: Extract<Widget, { type: 'weather' }>; header: ReactNode }) {
     const [data, setData] = useState<WeatherSnapshot | null>(null), [error, setError] = useState('');
@@ -50,7 +49,7 @@ export function Weather({ widget, header }: { widget: Extract<Widget, { type: 'w
     const days = forecast ?? Array.from({ length: 7 }, (_, i) => ({ date: addDays(today, i), code: -1, highC: 0, lowC: 0 }));
     const headline = data ? data.temperatureC >= 28 ? 'It’s hot.' : data.temperatureC >= 20 ? 'It’s warm.' : data.temperatureC >= 10 ? 'It’s cool.' : 'It’s cold.' : 'Your sky.';
     return <section className="widget weather-card" aria-label={widget.title || 'Weather'}>{header}<div className="weather-content">
-        <div className="weather-city"><span className="weather-location" aria-hidden="true"/><DraftField label="Weather city" maxLength={200} placeholder="City, country…" value={widget.content.city}
+        <div className="weather-city"><Icon name="location" className="weather-location"/><DraftField label="Weather city" maxLength={200} placeholder="City, country…" value={widget.content.city}
             onSave={(expected, value) => dashboardStore.dispatch({ type: 'weatherCity', widgetId: widget.id, expected, value })}/></div>
         <p className="weather-headline">{headline}</p>
         <div className="weather-description">

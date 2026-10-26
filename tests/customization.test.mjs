@@ -79,7 +79,7 @@ test('old documents/backups keep content, layouts, media, skins and existing app
         const legacy = seedDashboard(); legacy.schemaVersion = version; delete legacy.background;
         if (version === 2) { delete legacy.appearance; for (const widget of legacy.widgets) { delete widget.appearance; delete widget.pinned; } }
         const migrated = parseBackup(JSON.stringify(legacy)).dashboard;
-        assert.equal(migrated.schemaVersion,6);
+        assert.equal(migrated.schemaVersion,8);
         assert.deepEqual(migrated.widgets.map(w => w.content), old.widgets.map(w => w.content));
     }
 });

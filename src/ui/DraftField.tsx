@@ -9,8 +9,11 @@ interface Props {
     className?: string;
     placeholder?: string;
     required?: boolean;
+    autoFocus?: boolean;
+    selectOnFocus?: boolean;
+    onBlurComplete?: () => void;
 }
-export function DraftField({ value, label, onSave, multiline = false, maxLength = 100000, className = '', placeholder, required = false }: Props) {
+export function DraftField({ value, label, onSave, multiline = false, maxLength = 100000, className = '', placeholder, required = false, autoFocus = false, selectOnFocus = false, onBlurComplete }: Props) {
     const draftId = useId();
     const [draft, setDraft] = useState(value);
     const [base, setBase] = useState(value);
@@ -19,6 +22,11 @@ export function DraftField({ value, label, onSave, multiline = false, maxLength 
     const saveRef = useRef(onSave);
     saveRef.current = onSave;
     const savingRef = useRef(false);
+    const fieldRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+    const setFieldRef = (element: HTMLInputElement | HTMLTextAreaElement | null) => { fieldRef.current = element; };
+    const blurCompleteRef = useRef(onBlurComplete);
+    blurCompleteRef.current = onBlurComplete;
+    const completeAfterSave = useRef(false);
     const dirty = draft !== base;
     const current = useRef({ dirty, draft, label });
     current.current = { dirty, draft, label };
@@ -62,6 +70,12 @@ export function DraftField({ value, label, onSave, multiline = false, maxLength 
         try {
             await saveRef.current(expected, text);
             setBase(text);
+            current.current = { dirty: false, draft: text, label: current.current.label };
+            forgetDraft(draftId);
+            if (completeAfterSave.current) {
+                completeAfterSave.current = false;
+                blurCompleteRef.current?.();
+            }
         }
         catch (reason) {
             setError((reason instanceof Error ? reason.message : 'Could not save.') + ' Your draft is still here.');
@@ -78,7 +92,21 @@ export function DraftField({ value, label, onSave, multiline = false, maxLength 
         return () => clearTimeout(timer);
         // saveRef avoids restarting autosave because a parent's callback identity changed.
     }, [draft, base, dirty, saving, error]);
-    const common = { value: draft, 'aria-label': label, maxLength, placeholder, onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setDraft(event.target.value), 'aria-invalid': !!error };
+    useEffect(() => {
+        if (!autoFocus)
+            return;
+        fieldRef.current?.focus();
+        if (selectOnFocus && fieldRef.current instanceof HTMLInputElement)
+            fieldRef.current.select();
+    }, [autoFocus, selectOnFocus]);
+    const common = { ref: setFieldRef, value: draft, 'aria-label': label, maxLength, placeholder, onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setDraft(event.target.value), onFocus: () => { completeAfterSave.current = false; }, onBlur: () => {
+        if (!blurCompleteRef.current)
+            return;
+        if (dirty || savingRef.current)
+            completeAfterSave.current = true;
+        else
+            blurCompleteRef.current();
+    }, 'aria-invalid': !!error };
     return <div className={`draft-field ${className}`}>
     {multiline ? <textarea {...common} spellCheck/> : <input {...common} type="text"/>}
     <span className="field-state" role="status">{saving ? 'Saving…' : dirty && !error ? 'Unsaved draft' : ''}</span>

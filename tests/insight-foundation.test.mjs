@@ -19,10 +19,10 @@ test('v4 migration preserves every saved widget, media ID, running timer and lay
  let old=applyAction(seedDashboard(),{type:'timer',widgetId:'pomodoro-initial',expected:seedDashboard().widgets[2].content,command:'start',sessionId:'live-session',timeZone:'Asia/Calcutta'},1000);
  old.widgets.push(createWidget('image','photo'));old.widgets.at(-1).content.assetId='saved-image';old.background.assetId='background-image';old.schemaVersion=4;
  const original=structuredClone(old),{repo,state}=memory(JSON.stringify(old));
- const current=await repo.load();assert.equal(current.schemaVersion,6);assert.equal(current.widgets.length,5);assert.deepEqual(current.widgets,old.widgets);assert.deepEqual(current.background,old.background);assert.deepEqual(old,original);assert.equal(current.wellbeingSettings,undefined);assert.equal(state.writes,1);await repo.load();assert.equal(state.writes,1);
+ const current=await repo.load();assert.equal(current.schemaVersion,8);assert.equal(current.widgets.length,5);assert.deepEqual(current.widgets,old.widgets);assert.deepEqual(current.background,old.background);assert.deepEqual(old,original);assert.equal(current.wellbeingSettings,undefined);assert.equal(state.writes,1);await repo.load();assert.equal(state.writes,1);
 });
 test('future documents are retained with an update-required error, never seeded over',async()=>{
- const raw=JSON.stringify({...seedDashboard(),schemaVersion:7}),{repo,state}=memory(raw);
+ const raw=JSON.stringify({...seedDashboard(),schemaVersion:9}),{repo,state}=memory(raw);
  await assert.rejects(repo.load(),/newer DayNest version/);assert.equal(state.raw,raw);assert.equal(state.writes,0);
 });
 test('both widget defaults, graph data and new type appearances validate independently',()=>{

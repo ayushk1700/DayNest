@@ -1,4 +1,5 @@
 import { WidgetHeader } from './WidgetHeader';
+import { LinkGroup } from './LinkGroup';
 import { StickyNote } from './StickyNote';
 import { isAmbientNote } from '../state/model';
 import { Clock } from './Clock';
@@ -20,6 +21,7 @@ import { IconButton } from '../ui/IconButton';
 
 
 import { Icon } from '../ui/Icon';
+import { MusicExperience } from '../music/MusicExperience';
 import { Overlay } from '../ui/Overlay';
 import { DraftField } from '../ui/DraftField';
 import { dashboardStore } from '../state/store';
@@ -116,6 +118,8 @@ export function DashboardWidgets({ widgets }: {
 }
 
 export function WidgetContent({ widget }: { widget: Widget }): ReactNode {
+        if (widget.type === 'music') return <MusicExperience widget={widget}/>;
+        if (widget.type === 'linkGroup') return <LinkGroup widget={widget}/>;
         if (widget.type === 'scratchpad') return <ScratchpadCard widget={widget}/>;
         if (widget.type === 'wellbeing') return <WellbeingCard widget={widget}/>;
         if (widget.type === 'date')

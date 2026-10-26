@@ -1,4 +1,4 @@
-import type { DashboardDocument, Widget, ClockStyle, NoteSkin } from './model';
+import type { DashboardDocument, Widget, ClockStyle, NoteSkin, LinkShortcut } from './model';
 import { noteSkin } from './model';
 export type Habit = Extract<Widget, {
     type: 'habit';
@@ -41,6 +41,15 @@ export type LocalAction = {
     type: 'calendarDelete';
     widgetId: string;
     expected: CalendarEvent;
+} | {
+    type: 'linkShortcutUpsert';
+    widgetId: string;
+    expected: LinkShortcut | null;
+    value: LinkShortcut;
+} | {
+    type: 'linkShortcutDelete';
+    widgetId: string;
+    expected: LinkShortcut;
 } | {
     type: 'imageAsset';
     widgetId: string;
@@ -155,6 +164,26 @@ export function applyLocal(doc: DashboardDocument, action: LocalAction, conflict
             return conflict();
         expect(w.content.habits[i], action.expected);
         w.content.habits.splice(i, 1);
+        return;
+    }
+    if (action.type === 'linkShortcutUpsert' || action.type === 'linkShortcutDelete') {
+        if (w.type !== 'linkGroup') return conflict();
+        if (action.type === 'linkShortcutDelete') {
+            const i = w.content.links.findIndex(link => link.id === action.expected.id);
+            if (i < 0) return conflict();
+            expect(w.content.links[i], action.expected);
+            w.content.links.splice(i, 1);
+            return;
+        }
+        const i = w.content.links.findIndex(link => link.id === action.value.id);
+        if (action.expected === null) {
+            if (i >= 0) return conflict();
+            w.content.links.push(action.value);
+        } else {
+            if (i < 0) return conflict();
+            expect(w.content.links[i], action.expected);
+            w.content.links[i] = action.value;
+        }
         return;
     }
     if (w.type !== 'calendar')

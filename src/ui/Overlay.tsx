@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 const overlayStack: HTMLDivElement[] = [];
 let rootWasInert = false;
@@ -63,8 +64,8 @@ export function Overlay({ children, onClose, modal = false, label, fullPage = fa
             else document.querySelector<HTMLElement>('.floating-add')?.focus();
         };
     }, []);
-    return createPortal(<div className={fullPage ? 'ambient-backdrop' : modal ? 'backdrop' : 'picker-dismiss'} onPointerDown={e => {
+    return createPortal(<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className={fullPage ? 'ambient-backdrop' : modal ? 'backdrop' : 'picker-dismiss'} onPointerDown={e => {
             if (e.target === e.currentTarget)
                 onClose();
-        }}><div ref={ref} role="dialog" aria-modal={modal || undefined} aria-label={label} tabIndex={-1} className={fullPage ? 'ambient-page' : modal ? 'settings-panel' : 'widget-picker'}>{children}</div></div>, document.body);
+        }}><motion.div ref={ref} role="dialog" aria-modal={modal || undefined} aria-label={label} tabIndex={-1} className={fullPage ? 'ambient-page' : modal ? 'settings-panel' : 'widget-picker'} initial={{ opacity: 0, y: fullPage ? 8 : 10, scale: fullPage ? 1 : 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: fullPage ? 6 : 5, scale: fullPage ? 1 : 0.99 }} transition={{ type: 'spring', stiffness: 360, damping: 32, mass: 0.8 }}>{children}</motion.div></motion.div>, document.body);
 }

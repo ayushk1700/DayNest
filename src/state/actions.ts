@@ -113,7 +113,7 @@ function applyCore(source: DashboardDocument, action: Action, now = Date.now()):
         next.revision++;
         return validateDashboard(next);
     }
-    if (['clockStyle', 'notesSkin', 'calendarWeekStart', 'clockFormat', 'habitAdd', 'habitToggle', 'habitDelete', 'calendarUpsert', 'calendarDelete', 'imageAsset', 'imageCaption', 'imageFit', 'weatherCity', 'weatherUnits'].includes(action.type)) {
+    if (['clockStyle', 'notesSkin', 'calendarWeekStart', 'clockFormat', 'habitAdd', 'habitToggle', 'habitDelete', 'calendarUpsert', 'calendarDelete', 'linkShortcutUpsert', 'linkShortcutDelete', 'imageAsset', 'imageCaption', 'imageFit', 'weatherCity', 'weatherUnits'].includes(action.type)) {
         applyLocal(next, action as LocalAction, () => { throw new ConflictError(); });
         next.revision += 1;
         return validateDashboard(next);

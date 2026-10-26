@@ -61,7 +61,7 @@ export function alignedLayouts(widgets: Widget[], operation: Alignment): Map<str
     }
     return result;
 }
-export const minimums: Record<WidgetType, Widget['size']> = { scratchpad: { width: 300, height: 220 }, wellbeing: { width: 300, height: 190 }, video: { width: 260, height: 260 }, date: { width: 280, height: 180 }, todo: { width: 300, height: 360 }, notes: { width: 320, height: 260 }, sticky: { width: 150, height: 150 }, pomodoro: { width: 300, height: 263 }, reminder: { width: 340, height: 360 }, clock: { width: 240, height: 180 }, habit: { width: 300, height: 300 }, image: { width: 200, height: 200 }, calendar: { width: 320, height: 320 }, weather: { width: 260, height: 220 } };
+export const minimums: Record<WidgetType, Widget['size']> = { scratchpad: { width: 300, height: 220 }, wellbeing: { width: 300, height: 190 }, music: { width: 250, height: 280 }, linkGroup: { width: 320, height: 260 }, video: { width: 260, height: 260 }, date: { width: 280, height: 180 }, todo: { width: 300, height: 360 }, notes: { width: 320, height: 260 }, sticky: { width: 150, height: 150 }, pomodoro: { width: 300, height: 263 }, reminder: { width: 340, height: 360 }, clock: { width: 240, height: 180 }, habit: { width: 300, height: 300 }, image: { width: 200, height: 200 }, calendar: { width: 320, height: 320 }, weather: { width: 260, height: 220 } };
 export function gestureLayout(start: Layout, mode: 'move' | 'resize', dx: number, dy: number, zoom: number, type: WidgetType): Layout {
     if (!Number.isFinite(zoom) || zoom <= 0)
         throw Error('Invalid zoom');
@@ -98,6 +98,8 @@ export function createWidget(type: CoreType, id: string): Widget {
     switch (type) {
         case 'scratchpad': return { ...base, type, title: 'Scratchpad', size: { width: 360, height: 240 }, settings: {}, content: { nodes: [], connections: [] } };
         case 'wellbeing': return { ...base, type, title: 'Wellbeing', size: { width: 320, height: 190 }, settings: {}, content: {} };
+        case 'music': return { ...base, type, title: 'Music', size: { width: 330, height: 370 }, settings: {}, content: {} };
+        case 'linkGroup': return { ...base, type, title: 'Quick Links', size: { width: 400, height: 370 }, settings: {}, content: { links: [] } };
         case 'video': return { ...base, type, title: 'Video', size: { width: 400, height: 400 }, settings: { fit: 'contain' }, content: { assetId: null, caption: '' } };
         case 'date': return { ...base, type, title: 'Date', size: { width: 600, height: 240 }, settings: {}, content: {} };
         case 'todo': return { ...base, type, title: 'Todo List', size: { width: 356, height: 486 }, settings: { showCompleted: true }, content: { tasks: [] } };

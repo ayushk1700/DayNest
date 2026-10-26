@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactNode, KeyboardEvent, CSSProperties } from 'react';
+import { Icon } from './Icon';
 
 /** Unscaled card actions stay above clipping/scrolling card bodies. */
 export function WidgetMenu({ title, children }: { title: string; children: ReactNode }) {
@@ -54,7 +55,7 @@ export function WidgetMenu({ title, children }: { title: string; children: React
         }
     }
     return <div ref={root} className="widget-controls widget-menu" onKeyDown={key} onFocusCapture={event => { if (popup.current?.contains(event.target as Node)) enter(); }} onBlur={event => { if (!contains(event.relatedTarget as Node | null)) setOpen(false); }} onPointerEnter={event => { if (event.pointerType !== 'touch') enter(); }} onPointerLeave={leave}>
-        <button ref={trigger} id={id + '-trigger'} type="button" className="icon-button more-actions" aria-label={`Card menu for ${title}`} title={`Card menu for ${title}`} aria-expanded={open} aria-controls={id} onClick={enter}><span className="ellipsis" aria-hidden="true"><i/><i/><i/></span></button>
+        <button ref={trigger} id={id + '-trigger'} type="button" className="icon-button more-actions" aria-label={`Card menu for ${title}`} title={`Card menu for ${title}`} aria-expanded={open} aria-controls={id} onClick={enter}><Icon name="more"/></button>
         {createPortal(<div ref={popup} id={id} hidden={!open} data-side={position?.side} data-return-focus={id + '-trigger'} className="card-action-menu" role="region" aria-label={`${title} actions`} style={{ left: position?.left ?? 0, top: position?.top ?? 0, '--menu-pointer': `${position?.pointer ?? 24}px`, '--menu-scroll-height': `${position?.maxHeight ?? 500}px`, visibility: open && !position ? 'hidden' : undefined } as CSSProperties} onPointerEnter={enter} onPointerLeave={leave} onClick={event => { if ((event.target as HTMLElement).closest('button')) { trigger.current?.focus(); setOpen(false); } }}><span className="card-menu-tip" aria-hidden="true"/><div className="card-menu-scroll">{children}</div></div>, document.body)}
     </div>;
 }

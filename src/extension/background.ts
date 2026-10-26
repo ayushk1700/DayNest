@@ -2,6 +2,7 @@ import { Repository } from '../persistence/repository';
 import { createStorageAdapter, DOCUMENT_KEY } from '../persistence/adapter';
 import { extensionAPI } from './api';
 import { ALARM_NAME, runBackground } from './runner';
+import './music-background';
 const api = extensionAPI();
 if (api) {
     const repo = new Repository(createStorageAdapter());

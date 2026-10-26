@@ -60,13 +60,22 @@ export interface Task {
     text: string;
     completed: boolean;
 }
-export interface IdeaNode { id: string; title: string; body: string; position: { x: number; y: number }; width?: number; height?: number; }
+export const LINK_SHORTCUT_ICONS = ['link', 'search', 'music', 'calendar', 'notes', 'todo', 'weather', 'image', 'timer', 'habit', 'external', 'location'] as const;
+export type LinkShortcutIcon = typeof LINK_SHORTCUT_ICONS[number];
+export const LINK_SHORTCUT_COLORS = ['coral', 'amber', 'sage', 'sky', 'lavender', 'rose'] as const;
+export type LinkShortcutColor = typeof LINK_SHORTCUT_COLORS[number];
+export interface LinkShortcut { id: string; title: string; url: string; icon: LinkShortcutIcon; color: LinkShortcutColor; }
+export interface LinkGroupContent { links: LinkShortcut[]; }
+export type IdeaTone = 'paper' | 'sage' | 'sky' | 'sand' | 'rose' | 'lavender';
+export interface IdeaNode { id: string; title: string; body: string; position: { x: number; y: number }; width?: number; height?: number; tone?: IdeaTone; }
 export interface IdeaConnection { id: string; from: string; to: string; }
 export interface ScratchpadContent { nodes: IdeaNode[]; connections: IdeaConnection[]; }
 export interface WellbeingSettings {
     dailyBreakGoal?: number | null; recordingEnabled: boolean; retentionDays: 30 | 90; startedAt: number | null; }
 export const defaultWellbeingSettings = (): WellbeingSettings => ({ recordingEnabled: false, retentionDays: 90, startedAt: null });
 export interface ContentMap {
+    music: Record<string, never>;
+    linkGroup: LinkGroupContent;
     scratchpad: ScratchpadContent;
     wellbeing: Record<string, never>;
     video: { assetId: string | null; caption: string };
@@ -116,6 +125,8 @@ export const NOTE_SKINS = ['plain', 'lined', 'grid', 'dotted', 'kraft'] as const
 export type NoteSkin = typeof NOTE_SKINS[number];
 export function noteSkin(settings: { ruled: boolean; skin?: NoteSkin }): NoteSkin { return settings.skin ?? (settings.ruled ? 'lined' : 'plain'); }
 export interface SettingsMap {
+    music: Record<string, never>;
+    linkGroup: Record<string, never>;
     scratchpad: Record<string, never>;
     wellbeing: Record<string, never>;
     video: { fit: 'cover' | 'contain' };
@@ -156,7 +167,7 @@ export interface SettingsMap {
     };
 }
 export type WidgetType = keyof ContentMap;
-export const WIDGET_TYPES = ['video', 'date', 'todo', 'notes', 'sticky', 'pomodoro', 'reminder', 'clock', 'habit', 'image', 'calendar', 'weather', 'scratchpad', 'wellbeing'] as const satisfies readonly WidgetType[];
+export const WIDGET_TYPES = ['video', 'date', 'todo', 'notes', 'sticky', 'pomodoro', 'reminder', 'clock', 'habit', 'image', 'calendar', 'weather', 'scratchpad', 'wellbeing', 'music', 'linkGroup'] as const satisfies readonly WidgetType[];
 export type Widget = {
     [K in WidgetType]: {
         id: string;
@@ -180,7 +191,7 @@ export type Widget = {
 }[WidgetType];
 export const isAmbientNote = (widget: Widget): boolean => widget.type === 'sticky' && widget.settings.workspace === 'ambient';
 export interface DashboardDocument {
-    schemaVersion: 6;
+    schemaVersion: 8;
     revision: number;
     theme: Theme;
     zoom: number;
@@ -194,7 +205,7 @@ export interface DashboardDocument {
     widgets: Widget[];
 }
 export function seedDashboard(): DashboardDocument {
-    return { schemaVersion: 6, revision: 0, theme: 'Ocean Breeze', zoom: 1, appearance: emptyAppearance(), background: emptyBackground(), widgets: [
+    return { schemaVersion: 8, revision: 0, theme: 'Ocean Breeze', zoom: 1, appearance: emptyAppearance(), background: emptyBackground(), widgets: [
             { ...cardDefaults(), id: 'todo-initial', type: 'todo', title: 'Todo List', position: { x: 58, y: 84 }, size: { width: 356, height: 486 }, zIndex: 0, settings: { showCompleted: true }, content: { tasks: [{ id: 'task-initial', text: 'Be happy', completed: false }] } },
             { ...cardDefaults(), id: 'notes-initial', type: 'notes', title: 'Notes (titles are changeable)', position: { x: 490, y: 122 }, size: { width: 469, height: 375 }, zIndex: 1, settings: { ruled: false }, content: { text: 'DayNest - track everything on one page!' } },
             { ...cardDefaults(), id: 'pomodoro-initial', type: 'pomodoro', title: 'Pomodoro Timer', position: { x: 996, y: 122 }, size: { width: 319, height: 263 }, zIndex: 2, settings: { workMinutes: 25, breakMinutes: 5 }, content: idleTimer() },

@@ -4,6 +4,7 @@ import { workspaceTools, useWorkspaceTools } from '../state/workspace-tools';
 import { defaultLayoutAssistance, isAmbientNote } from '../state/model';
 import { useViewport } from './useViewport';
 import { Overlay } from '../ui/Overlay';
+import { Icon } from '../ui/Icon';
 import { AppearanceControls } from './AppearanceControls';
 import type { Alignment } from './layout';
 
@@ -35,7 +36,7 @@ export function WorkspaceTools() {
         <button type="button" className="small" aria-pressed={tools.selecting} onClick={() => { workspaceTools.update({ selecting: !tools.selecting, selected: [], message: '' }); setError(''); }}>{tools.selecting ? 'Done selecting' : 'Select widgets'}</button>
         {tools.selecting && <><span role="status">{selected.length} selected</span><button type="button" className="small" onClick={() => workspaceTools.update({ selected: widgets.map(w => w.id) })}>Select all</button><button type="button" className="small" onClick={() => workspaceTools.update({ selected: [] })}>Clear selection</button><button type="button" className="primary" disabled={!selected.length} onClick={() => setEditing(true)}>Edit appearance</button>
         <div className="selection-alignments" role="group" aria-label="Align selected widgets">{(['left', 'center', 'right', 'top', 'middle', 'bottom'] as const).map(operation => <button type="button" className="small" key={operation} disabled={narrow || pinned || selected.length < 2 || state.pending > 0} title={reason} onClick={() => align(operation)}>Align {operation}</button>)}{(['horizontal', 'vertical'] as const).map(operation => <button type="button" className="small" key={operation} disabled={narrow || pinned || selected.length < 3 || state.pending > 0} title={reason} onClick={() => align(operation)}>Distribute {operation === 'horizontal' ? 'horizontally' : 'vertically'}</button>)}</div><p>{reason}</p></>}
-        {tools.message && <p role="status">{tools.message}<button className="selection-dismiss" aria-label="Dismiss workspace message" onClick={() => workspaceTools.update({ message: '' })}>×</button></p>}{error && <p role="alert">{error}</p>}
+        {tools.message && <p role="status">{tools.message}<button className="selection-dismiss" aria-label="Dismiss workspace message" onClick={() => workspaceTools.update({ message: '' })}><Icon name="close"/></button></p>}{error && <p role="alert">{error}</p>}
         {editing && <Overlay modal label="Customize selected widgets" onClose={() => setEditing(false)}><h1>Style {selected.length} selected widgets</h1><AppearanceControls widgetIds={selected.map(w => w.id)} onSaved={() => setEditing(false)} onCancel={() => setEditing(false)}/></Overlay>}
     </div>;
 }

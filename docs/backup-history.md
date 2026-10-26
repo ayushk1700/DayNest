@@ -30,7 +30,7 @@ Settings → **Restore previous dashboard** previews the single most recent reco
 
 ## Icon assets
 
-Flaticon Uicons 3.3.1 Regular Rounded is bundled as a local WOFF2 font with mappings for 32 used glyphs. No CDN request occurs at runtime. The license is included in `public/licenses/flaticon.txt` and built output, with the required Flaticon attribution link in Settings. `scripts/vendor-uicons.mjs` is an optional build-time acquisition script; normal builds use the committed local assets. Card actions are disclosed by a three-dot hover/click/keyboard button; action icons also have names and tooltips.
+Flaticon Uicons 3.3.1 Regular Rounded is bundled as a local WOFF2 font with mappings for 53 used glyphs. No CDN request occurs at runtime. The license is included in `public/licenses/flaticon.txt` and built output, with the required Flaticon attribution link in Settings. `scripts/vendor-uicons.mjs` is an optional build-time acquisition script; normal builds use the committed local assets. Card actions are disclosed by a three-dot hover/click/keyboard button; action icons also have names and tooltips.
 
 
 Card customization update: appearance defaults/overrides and pins are included in schema 3 and history. Old dashboards and backups migrate without losing content/layout. Pinning blocks geometry changes, including older geometry history while the card is pinned. See card-customization.md.

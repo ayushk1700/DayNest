@@ -11,7 +11,7 @@
 A calm, personal new-tab dashboard for Microsoft Edge.<br />
 For your scattered thoughts, your next small step, and a little sunshine.
 
-**🌱 Private beta &nbsp; · &nbsp; 🔒 Local storage &nbsp; · &nbsp; 🧩 12 widgets &nbsp; · &nbsp; 🎨 12 themes**
+**🌱 Private beta &nbsp; · &nbsp; 🔒 Local storage &nbsp; · &nbsp; 🧩 16 widgets &nbsp; · &nbsp; 🎨 12 themes**
 
 [Product website](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site) · [Privacy](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site/privacy.html) · [Get help](mailto:aayush31500@outlook.com)
 
@@ -30,7 +30,11 @@ For your scattered thoughts, your next small step, and a little sunshine.
 | Notes, to-dos and sticky notes | Pomodoro, reminders, habits and calendar | Twelve themes, paper styles and personal media |
 | A home for loose ends and ideas | Focus on the next small thing | Move, resize, customize and pin your widgets |
 
-Clock, Date, Weather, Image and Video widgets complete the workspace. Weather includes current conditions and a seven-day forecast from Open-Meteo.
+Clock, Date, Weather, Image, Video and Link Group widgets complete the workspace. Link Groups keep named web shortcuts together with custom built-in icons and colors. Weather includes current conditions and a seven-day forecast from Open-Meteo.
+
+### PDF Studio
+
+Open PDF Studio from the document icon in the DayNest toolbar. It opens in its own browser tab so the dashboard stays clear while you work. Open a local PDF, choose a folder, drop files into the window, or reopen a recent document. PDF Studio supports reading, text search and selection, highlights, notes, freehand marks, page rotation and reordering, duplication, deletion, merging and exporting an edited copy.
 
 ## A mood for every kind of day
 
@@ -51,6 +55,8 @@ Clock, Date, Weather, Image and Video widgets complete the workspace. Weather in
 
 - **No account, ads or built-in analytics.** Your dashboard and uploaded media stay in your browser profile.
 - **Local widgets work offline.** Weather needs internet and sends your city search and resolved coordinates to Open-Meteo.
+- **PDF Studio works on-device.** PDFs are rendered and marked up locally; the source file is never overwritten. Export downloads a separate copy. Up to eight recent PDFs are kept in this browser profile so they can be reopened, and can be removed from Recents.
+- **Open PDF tabs is optional.** Choosing **Find open PDFs** requests the browser's optional Tabs permission so DayNest can identify matching open PDF tabs and switch to one. Tab details are checked locally and are not sent anywhere.
 - **Portable backups.** Export and import JSON backups that include your uploaded images and videos.
 - **Room to change your mind.** Undo up to 50 actions in the current tab; replacement and reset operations preserve one previous-dashboard recovery copy.
 
@@ -100,17 +106,15 @@ node scripts/run-tests.mjs
 
 </details>
 
-## 📦 Release files
+## 📦 Release preparation
 
 | File | Purpose |
 | --- | --- |
-| [Extension ZIP](release/daynest-0.1.0-candidate.zip) | Version 0.1.0 candidate; extract before loading in Edge |
-| [SHA-256 checksum](release/daynest-0.1.0-candidate.zip.sha256) | Verify the candidate archive |
-| [Beta kit](release/daynest-0.1.0-beta-kit.zip) | Candidate extension and tester instructions |
 | [Manual testing checklist](release/manual-testing-checklist.md) | Remaining device and browser checks |
+| [Packaging script](release/package-extension.ps1) | Create and verify a fresh ZIP from the current `dist/` build |
 | [Store assets](release/store-assets/) | Product screenshots and listing logo |
 
-Extract the extension ZIP to a stable folder. In `edge://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the extracted folder containing `manifest.json`. This is a candidate build, not a store-certified release.
+Packages built from this repository are local build outputs. Review the manual checklist and release gates before sharing a package; a successful build is not store certification.
 
 To package a fresh build on Windows, run `pnpm build`, then:
 
@@ -173,9 +177,9 @@ Visit the **[DayNest website](https://daynest-calm-new-tab.clever-tang-0272.chat
 | [Storage and recovery](docs/storage.md) | Persistence, validation, migrations and recovery |
 | [Backups and history](docs/backup-history.md) | Export/import and undo contracts |
 | [Weather provider](docs/weather-provider.md) | Requests, caching, attribution and provider terms |
+| [PDF Studio](docs/pdf-studio-plan.md) | Local PDF reading, markup, page organization, export and privacy behavior |
 | [Beta plan](release/beta-plan.md) | Tester tasks and feedback collection |
 | [Store listing](release/store-listing.md) | Prepared copy, permissions and certification notes |
-| [Website source](website/daynest/dist/index.html) | Product, privacy and support pages |
 
 ## Credits and support
 
