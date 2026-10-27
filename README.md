@@ -15,7 +15,7 @@ For your scattered thoughts, your next small step, and a little sunshine.
 
 [Product website](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site) · [Privacy](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site/privacy.html) · [Get help](mailto:aayush31500@outlook.com)
 
-<img src="docs/screenshots/release-2026-10-20/01-your-day.png" alt="DayNest Warm Earth dashboard with tasks, notes, a focus timer, clock and sticky note. Illustrative demo content." width="100%" />
+<img src="release/store-assets/01-your-day.png" alt="DayNest Warm Earth dashboard with tasks, notes, a focus timer, clock and sticky note. Illustrative demo content." width="100%" />
 
 *Less tab-hopping. More headspace.*
 
@@ -30,7 +30,7 @@ For your scattered thoughts, your next small step, and a little sunshine.
 | Notes, to-dos and sticky notes | Pomodoro, reminders, habits and calendar | Twelve themes, paper styles and personal media |
 | A home for loose ends and ideas | Focus on the next small thing | Move, resize, customize and pin your widgets |
 
-Clock, Date, Weather, Image, Video and Link Group widgets complete the workspace. Link Groups keep named web shortcuts together with custom built-in icons and colors. Weather includes current conditions and a seven-day forecast from Open-Meteo.
+Clock, Date, Weather, Image, Video, Link Group and Music widgets complete the workspace. Link Groups keep named web shortcuts together with custom built-in icons and colors. Weather includes current conditions and a seven-day forecast from Open-Meteo. Music connects to YouTube Music with playback controls, a recent-track list and an optional equalizer.
 
 ### PDF Studio
 
@@ -40,8 +40,8 @@ Open PDF Studio from the document icon in the DayNest toolbar. It opens in its o
 
 <table>
 <tr>
-<td width="50%"><img src="docs/screenshots/release-2026-10-20/02-after-hours.png" alt="DayNest after-hours dashboard" width="100%" /></td>
-<td width="50%"><img src="docs/screenshots/release-2026-10-20/03-make-it-yours.png" alt="DayNest appearance customization" width="100%" /></td>
+<td width="50%"><img src="release/store-assets/02-after-hours.png" alt="DayNest after-hours dashboard" width="100%" /></td>
+<td width="50%"><img src="release/store-assets/03-make-it-yours.png" alt="DayNest appearance customization" width="100%" /></td>
 </tr>
 <tr>
 <td align="center"><b>After hours</b><br /><sub>A softer space to wind down.</sub></td>
@@ -55,6 +55,7 @@ Open PDF Studio from the document icon in the DayNest toolbar. It opens in its o
 
 - **No account, ads or built-in analytics.** Your dashboard and uploaded media stay in your browser profile.
 - **Local widgets work offline.** Weather needs internet and sends your city search and resolved coordinates to Open-Meteo.
+- **Music is optional.** When you use the Music widget with YouTube Music, DayNest reads the visible track title, artist, album, artwork and playback state from `music.youtube.com`, and can control play/pause, previous and next. It keeps up to 12 recent tracks and your equalizer preferences in the browser profile. Starting the equalizer from the extension popup captures that YouTube Music tab's audio for local processing; the audio is not recorded or sent by DayNest.
 - **PDF Studio works on-device.** PDFs are rendered and marked up locally; the source file is never overwritten. Export downloads a separate copy. Up to eight recent PDFs are kept in this browser profile so they can be reopened, and can be removed from Recents.
 - **Open PDF tabs is optional.** Choosing **Find open PDFs** requests the browser's optional Tabs permission so DayNest can identify matching open PDF tabs and switch to one. Tab details are checked locally and are not sent anywhere.
 - **Portable backups.** Export and import JSON backups that include your uploaded images and videos.
@@ -81,7 +82,7 @@ For a local developer installation:
 
 ## Build and run
 
-Requires **Node 22.12+** and **pnpm 11.25.0**. Windows with Node 24 is the verified development environment.
+Requires **Node 22.13+** and **pnpm 11.25.0**. Windows with Node 24 is the verified development environment.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -135,7 +136,7 @@ Two new compact cards open accessible expanded views. Scratchpad includes a loca
 
 The 20 October 2026 release pass includes:
 
-- Strict TypeScript, self-contained production package validation and **93 automated tests**.
+- Strict TypeScript, self-contained production package validation and **129 automated tests**.
 - Isolated installed Edge checks for the sunflower tab favicon, browser restart, background alarms, invalid-data preservation and recovery.
 - Browser checks for multiple tabs, conflict handling, backup/import, reset recovery, local media, offline behavior and twelve theme contrast checks.
 - Keyboard focus containment/return, narrow layouts, forced-colors and reduced-motion emulation.
@@ -166,7 +167,6 @@ Visit the **[DayNest website](https://daynest-calm-new-tab.clever-tang-0272.chat
 
 - [Privacy policy](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site/privacy.html)
 - [Support](https://daynest-calm-new-tab.clever-tang-0272.chatgpt.site/support.html)
-- [Website source](website/daynest/dist/index.html)
 
 ## Find your way around
 

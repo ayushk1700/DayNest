@@ -1,7 +1,18 @@
 import { isMusicEqPreset, musicEqPreset, type MusicEqPreset } from '../music/equalizer';
 
 interface EqChrome {
-  runtime: { onMessage: { addListener(listener: (message: unknown, sender: { id?: string }, sendResponse: (response: unknown) => void) => boolean | void): void }; id?: string };
+  runtime: {
+    onMessage: {
+      addListener(
+        listener: (
+          message: unknown,
+          sender: { id?: string },
+          sendResponse: (response: unknown) => void,
+        ) => boolean | void,
+      ): void;
+    };
+    id?: string;
+  };
 }
 const chromeApi = (globalThis as typeof globalThis & { chrome?: EqChrome }).chrome;
 let context: AudioContext | undefined;
@@ -15,14 +26,16 @@ let spatialEnabled = false;
 function applyPreset(value: unknown) {
   if (!isMusicEqPreset(value) || !context) return false;
   const preset = musicEqPreset(value);
-  filters.forEach((filter, index) => filter.gain.setTargetAtTime(preset.bands[index] ?? 0, context!.currentTime, 0.08));
+  filters.forEach((filter, index) =>
+    filter.gain.setTargetAtTime(preset.bands[index] ?? 0, context!.currentTime, 0.08),
+  );
   return true;
 }
 
 async function stop() {
-  stream?.getTracks().forEach(track => track.stop());
+  stream?.getTracks().forEach((track) => track.stop());
   stream = undefined;
-  spatialNodes.forEach(node => node.disconnect());
+  spatialNodes.forEach((node) => node.disconnect());
   spatialNodes = [];
   eqOutput?.disconnect();
   eqOutput = undefined;
@@ -35,7 +48,7 @@ async function stop() {
 
 function applySpatial(enabled: boolean) {
   if (!context || !eqOutput || !compressor) return false;
-  spatialNodes.forEach(node => node.disconnect());
+  spatialNodes.forEach((node) => node.disconnect());
   spatialNodes = [];
   eqOutput.disconnect();
   if (!enabled) {
@@ -125,7 +138,26 @@ function applySpatial(enabled: boolean) {
   rightMix.connect(merger, 0, 1);
   merger.connect(spatialGain);
   spatialGain.connect(compressor);
-  spatialNodes = [input, midLeft, midRight, sideLeft, sideRight, mid, side, centerPanner, leftPanner, rightPanner, centerChannels, leftChannels, rightChannels, leftMix, rightMix, merger, dryGain, spatialGain];
+  spatialNodes = [
+    input,
+    midLeft,
+    midRight,
+    sideLeft,
+    sideRight,
+    mid,
+    side,
+    centerPanner,
+    leftPanner,
+    rightPanner,
+    centerChannels,
+    leftChannels,
+    rightChannels,
+    leftMix,
+    rightMix,
+    merger,
+    dryGain,
+    spatialGain,
+  ];
   spatialEnabled = true;
   return true;
 }
@@ -133,7 +165,7 @@ function applySpatial(enabled: boolean) {
 async function start(streamId: string, presetValue: unknown, spatial: boolean) {
   await stop();
   const constraints = {
-    audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } }
+    audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } },
   } as unknown as MediaStreamConstraints;
   stream = await navigator.mediaDevices.getUserMedia(constraints);
   context = new AudioContext();
@@ -161,28 +193,69 @@ async function start(streamId: string, presetValue: unknown, spatial: boolean) {
   const inputHeadroom = context.createGain();
   inputHeadroom.gain.value = 0.5;
   source.connect(inputHeadroom).connect(filters[0]);
-  for (let index = 0; index < filters.length - 1; index++) filters[index].connect(filters[index + 1]);
+  for (let index = 0; index < filters.length - 1; index++)
+    filters[index].connect(filters[index + 1]);
   eqOutput = filters.at(-1)!;
   compressor.connect(output).connect(context.destination);
   applySpatial(spatial);
-  stream.getAudioTracks().forEach(track => track.addEventListener('ended', () => { void stop(); }, { once: true }));
+  stream.getAudioTracks().forEach((track) =>
+    track.addEventListener(
+      'ended',
+      () => {
+        void stop();
+      },
+      { once: true },
+    ),
+  );
   if (!applyPreset(presetValue)) applyPreset('studio');
-  return { ok: true, active: true, spatial: spatialEnabled, preset: isMusicEqPreset(presetValue) ? presetValue : 'studio' };
+  return {
+    ok: true,
+    active: true,
+    spatial: spatialEnabled,
+    preset: isMusicEqPreset(presetValue) ? presetValue : 'studio',
+  };
 }
 
 chromeApi?.runtime.onMessage.addListener((message, _sender, respond) => {
   if (!message || typeof message !== 'object') return;
-  const request = message as { target?: string; type?: string; streamId?: string; preset?: MusicEqPreset; spatial?: boolean; enabled?: boolean };
+  const request = message as {
+    target?: string;
+    type?: string;
+    streamId?: string;
+    preset?: MusicEqPreset;
+    spatial?: boolean;
+    enabled?: boolean;
+  };
   if (request.target !== 'equalizer-offscreen' || !request.type?.startsWith('music:eq:')) return;
   if (request.type === 'music:eq:start' && request.streamId) {
-    void start(request.streamId, request.preset, request.spatial === true).then(respond, error => {
-      void stop();
-      respond({ ok: false, active: false, error: error instanceof Error ? error.message : 'Audio capture failed.' });
-    });
+    void start(request.streamId, request.preset, request.spatial === true).then(
+      respond,
+      (error) => {
+        void stop();
+        respond({
+          ok: false,
+          active: false,
+          error: error instanceof Error ? error.message : 'Audio capture failed.',
+        });
+      },
+    );
     return true;
   }
-  if (request.type === 'music:eq:set') { respond({ ok: true, active: !!context && applyPreset(request.preset), preset: request.preset }); return; }
-  if (request.type === 'music:eq:spatial') { const applied = !!context && applySpatial(request.enabled === true); respond({ ok: true, active: !!context, spatial: context ? spatialEnabled : false, applied }); return; }
-  if (request.type === 'music:eq:status') { respond({ ok: true, active: !!context, spatial: spatialEnabled }); return; }
-  if (request.type === 'music:eq:stop') { void stop().then(() => respond({ ok: true, active: false })); return true; }
+  if (request.type === 'music:eq:set') {
+    respond({ ok: true, active: !!context && applyPreset(request.preset), preset: request.preset });
+    return;
+  }
+  if (request.type === 'music:eq:spatial') {
+    const applied = !!context && applySpatial(request.enabled === true);
+    respond({ ok: true, active: !!context, spatial: context ? spatialEnabled : false, applied });
+    return;
+  }
+  if (request.type === 'music:eq:status') {
+    respond({ ok: true, active: !!context, spatial: spatialEnabled });
+    return;
+  }
+  if (request.type === 'music:eq:stop') {
+    void stop().then(() => respond({ ok: true, active: false }));
+    return true;
+  }
 });

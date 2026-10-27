@@ -9,4 +9,10 @@ import './pdf.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('PDF Studio mounting element is missing.');
-createRoot(root).render(<StrictMode><MotionConfig reducedMotion="user" transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}><PdfStudio /></MotionConfig></StrictMode>);
+createRoot(root).render(
+  <StrictMode>
+    <MotionConfig reducedMotion="user" transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}>
+      <PdfStudio />
+    </MotionConfig>
+  </StrictMode>,
+);

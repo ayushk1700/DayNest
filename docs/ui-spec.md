@@ -1,4 +1,4 @@
-# Purrductivity reference specification
+# DayNest reference specification
 
 ## Scope and evidence
 Stage 1 establishes the build and a basic shell only. The five supplied screenshots were inspected in the conversation. Screenshot text is example content. No existing project or applicable AGENTS.md was found in the workspace or its ancestors.
@@ -39,5 +39,5 @@ The static core cards now use validated persisted data. Todo, Notes and Sticky c
 Persisted header movement, resizing, stacking order, keyboard/numeric arrangement and zoom are implemented. Fixed controls and all dialogs/picker remain outside the transformed canvas. Narrow views retain the saved desktop geometry. Timer state/settings and reminders are functional through an alarm-backed module worker. All picker entries now create local widgets; Clock/Habit/Image/Calendar are complete and Weather explicitly requires provider setup. New layouts follow the reference palette/card treatment; they are product decisions where screenshots showed only names. See timing.md, local-widgets.md and the Stage 5â€“7 verification reports.
 
 
-## Stages 8–9 and icon refinement
+## Stages 8ï¿½9 and icon refinement
 All six themes, per-tab undo/redo, portable image backups, import previews, confirmed reset and recovery are implemented. Widget actions now sit in a compact three-dot disclosure: hover, click, Enter or Arrow Down opens the floating Layout/Rename/Delete menu; Escape and outside clicks close it. Hover/focus also reveals the dots, and touch keeps them visible. Flaticon Regular Rounded glyphs are bundled locally with attribution. Additional notification/recovery sections make Settings taller than the reference, with scrolling within the viewport. Audit evidence and remaining manual checks are recorded in release-checklist.md.

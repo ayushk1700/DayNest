@@ -28,12 +28,22 @@ export function loadPdf(bytes: Uint8Array) {
 
 function toColor(value: string) {
   const hex = value.replace('#', '');
-  const normalized = hex.length === 3 ? hex.split('').map(char => char + char).join('') : hex;
+  const normalized =
+    hex.length === 3
+      ? hex
+          .split('')
+          .map((char) => char + char)
+          .join('')
+      : hex;
   const number = Number.parseInt(normalized, 16);
   return rgb(((number >> 16) & 255) / 255, ((number >> 8) & 255) / 255, (number & 255) / 255);
 }
 
-function drawMark(page: ReturnType<PDFDocument['getPage']>, mark: PdfMark, font: Awaited<ReturnType<PDFDocument['embedFont']>>) {
+function drawMark(
+  page: ReturnType<PDFDocument['getPage']>,
+  mark: PdfMark,
+  font: Awaited<ReturnType<PDFDocument['embedFont']>>,
+) {
   const color = toColor(mark.color);
   if (mark.type === 'highlight') {
     page.drawRectangle({
@@ -82,8 +92,15 @@ export async function exportPdf(
   onlyPageIndex?: number,
 ): Promise<Uint8Array> {
   const source = await PDFDocument.load(sourceBytes, { updateMetadata: false });
-  const ordered = onlyPageIndex === undefined ? sourcePageOrder : [sourcePageOrder[onlyPageIndex - 1]].filter((value): value is number => value !== undefined);
-  const isReordered = ordered.length !== source.getPageCount() || ordered.some((pageNumber, index) => pageNumber !== index + 1);
+  const ordered =
+    onlyPageIndex === undefined
+      ? sourcePageOrder
+      : [sourcePageOrder[onlyPageIndex - 1]].filter(
+          (value): value is number => value !== undefined,
+        );
+  const isReordered =
+    ordered.length !== source.getPageCount() ||
+    ordered.some((pageNumber, index) => pageNumber !== index + 1);
   let output: PDFDocument;
   let outputPages: ReturnType<PDFDocument['getPage']>[];
 
@@ -91,8 +108,11 @@ export async function exportPdf(
     output = await PDFDocument.create();
     if (source.getTitle()) output.setTitle(source.getTitle()!);
     if (source.getAuthor()) output.setAuthor(source.getAuthor()!);
-    outputPages = await output.copyPages(source, ordered.map(pageNumber => pageNumber - 1));
-    outputPages.forEach(page => output.addPage(page));
+    outputPages = await output.copyPages(
+      source,
+      ordered.map((pageNumber) => pageNumber - 1),
+    );
+    outputPages.forEach((page) => output.addPage(page));
   } else {
     output = source;
     outputPages = output.getPages();
@@ -103,14 +123,21 @@ export async function exportPdf(
     const sourcePageNumber = ordered[outputIndex];
     const page = outputPages[outputIndex];
     if (!sourcePageNumber || !page) continue;
-    const extraRotation = pageRotations[onlyPageIndex === undefined ? outputIndex : onlyPageIndex - 1] ?? 0;
-    if (extraRotation) page.setRotation(degrees((page.getRotation().angle + extraRotation + 360) % 360));
-    marks.filter(mark => mark.page === sourcePageNumber).forEach(mark => drawMark(page, mark, font));
+    const extraRotation =
+      pageRotations[onlyPageIndex === undefined ? outputIndex : onlyPageIndex - 1] ?? 0;
+    if (extraRotation)
+      page.setRotation(degrees((page.getRotation().angle + extraRotation + 360) % 360));
+    marks
+      .filter((mark) => mark.page === sourcePageNumber)
+      .forEach((mark) => drawMark(page, mark, font));
   }
   return output.save({ useObjectStreams: false });
 }
 
-export async function mergePdfs(files: File[], onProgress?: (value: string) => void): Promise<Uint8Array> {
+export async function mergePdfs(
+  files: File[],
+  onProgress?: (value: string) => void,
+): Promise<Uint8Array> {
   if (files.length === 0) throw new Error('Choose at least one PDF to merge.');
   const merged = await PDFDocument.create();
   for (let index = 0; index < files.length; index += 1) {
@@ -119,7 +146,7 @@ export async function mergePdfs(files: File[], onProgress?: (value: string) => v
     onProgress?.(`Reading ${file.name} (${index + 1} of ${files.length})…`);
     const source = await PDFDocument.load(new Uint8Array(await file.arrayBuffer()));
     const copied = await merged.copyPages(source, source.getPageIndices());
-    copied.forEach(page => merged.addPage(page));
+    copied.forEach((page) => merged.addPage(page));
   }
   if (files[0]?.name) merged.setTitle(`Merged · ${files[0].name.replace(/\.pdf$/i, '')}`);
   return merged.save({ useObjectStreams: false });

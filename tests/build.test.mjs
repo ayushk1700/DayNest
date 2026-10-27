@@ -10,7 +10,7 @@ test('production output is a self-contained new-tab extension with storage/alarm
 });
 
 test('package verification rejects missing, remote, escaping and nonliteral worker imports', () => {
-  const directory = mkdtempSync(join(tmpdir(), 'purrductivity-package-test-'));
+  const directory = mkdtempSync(join(tmpdir(), 'daynest-package-test-'));
   try {
     const cases = [
       ['import "./assets/missing-worker.js";', /Missing module/],

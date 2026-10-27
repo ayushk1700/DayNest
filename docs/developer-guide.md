@@ -3,7 +3,7 @@
 A local Microsoft Edge New Tab dashboard using React, strict TypeScript, Vite and Manifest V3. Stages 1 through 9 are implemented. Verification evidence and remaining manual checks are recorded in docs/release-checklist.md.
 
 ## Run and build
-Requires Node 22.12+ (Node 24 was verified) and pnpm 11.25.0, pinned in package.json.
+Requires Node 22.13+ (Node 24 was verified) and pnpm 11.25.0, pinned in package.json.
 
 ```sh
 pnpm install --frozen-lockfile

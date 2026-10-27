@@ -3,4 +3,9 @@ dist/
 *.local
 .pnpm-store/
 .test-build/
+output/branding/
+output/local-branding/
+docs/screenshots/release-2026-10-20/01-your-day.png
+docs/screenshots/release-2026-10-20/02-after-hours.png
+docs/screenshots/release-2026-10-20/03-make-it-yours.png
 artifacts/

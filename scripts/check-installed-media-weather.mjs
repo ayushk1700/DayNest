@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 const require = createRequire(process.env.PLAYWRIGHT_PACKAGE ?? import.meta.url);
 const { chromium } = require('playwright');
-const directory = await mkdtemp(join(tmpdir(), 'purrductivity-media-edge-'));
+const directory = await mkdtemp(join(tmpdir(), 'daynest-media-edge-'));
 const dist = resolve('dist');
 const launch = () => chromium.launchPersistentContext(directory, { headless: true, executablePath: process.env.EDGE_EXECUTABLE ?? 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', ignoreDefaultArgs: ['--disable-extensions'], args: [`--disable-extensions-except=${dist}`, `--load-extension=${dist}`], viewport: { width: 1920, height: 925 } });
 let context = await launch(), worker;

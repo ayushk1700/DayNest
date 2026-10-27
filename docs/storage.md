@@ -12,6 +12,8 @@ Image content contains a nullable asset ID and caption, never a binary or data U
 ## Adapters
 Production adapter: `chrome.storage.local`, using the storage permission. Background alarms additionally require alarms; notifications remain optional. Browser preview: localStorage. Both use `purrductivity.dashboard`, containing a JSON string. Browser preview storage is tied to the exact origin and is independent of extension storage.
 
+The `purrductivity` namespace is a legacy compatibility name. Keep the dashboard, recovery, Music preference/history, IndexedDB, alarm and backup-format identifiers stable: users' saved data and portable backups depend on them, and older open tabs coordinate through the existing Web Lock names. A future rename must include explicit migrations and compatibility handling rather than changing these identifiers in place.
+
 Web Locks named `purrductivity-document` serialize this app's read/validate/update/write operations across pages of the same origin. Every writer must use the repository; the implemented background worker and any future import/reset operations follow the same protocol. There is no unlocked fallback: without Web Locks, the app reports a recoverable storage error instead of risking simultaneous writes. A current Edge version or localhost preview is required. Browser events do not provide compare-and-swap on their own.
 
 The extension adapter subscribes to `chrome.storage.onChanged` for the local document key; the development adapter listens for `storage` events. Notifications queue behind writes, trigger a validated reread, and never persist an old in-memory snapshot. Sample seeding occurs inside the lock only when the key is absent. Persisted empty content and an empty dashboard stay empty.
