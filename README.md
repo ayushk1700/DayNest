@@ -183,7 +183,7 @@ Visit the **[DayNest website](https://daynest-calm-new-tab.clever-tang-0272.chat
 
 ## Credits and support
 
-The sunflower is DayNest's pixel-art brand icon, created from the supplied sunflower reference. UI icons are **[Flaticon Uicons](https://www.flaticon.com/uicons)**, with visible credit in Settings. React and React DOM use the MIT license. Weather data is provided by **[Open-Meteo](https://open-meteo.com/)** under CC BY 4.0; API service terms apply separately. See [third-party notices](public/licenses/third-party.txt) and the [Flaticon license](public/licenses/flaticon.txt).
+DayNest's source code is released under the [MIT License](LICENSE). Third-party components and assets retain their separate terms: UI icons are **[Flaticon Uicons](https://www.flaticon.com/uicons)**, with visible credit in Settings; React and React DOM use MIT; Weather data is provided by **[Open-Meteo](https://open-meteo.com/)** under CC BY 4.0, with API service terms applying separately. See [third-party notices](public/licenses/third-party.txt) and the [Flaticon license](public/licenses/flaticon.txt). The sunflower is DayNest's pixel-art brand icon, created from the supplied sunflower reference.
 
 Questions, ideas or a rough edge? **[aayush31500@outlook.com](mailto:aayush31500@outlook.com)**. Please remove private dashboard content from screenshots and do not email full backups by default.
 
