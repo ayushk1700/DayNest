@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, DragEvent as ReactDragEvent, FormEvent as ReactFormEvent, PointerEvent as ReactPointerEvent } from 'react';
+import type { CSSProperties, DragEvent as ReactDragEvent, FormEvent as ReactFormEvent, PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from 'react';
 import { Icon } from '../ui/Icon';
 import type { Name } from '../ui/Icon';
 import { createStorageAdapter } from '../persistence/adapter';
@@ -145,6 +145,8 @@ export function PdfStudio() {
   const readerStage = useRef<HTMLDivElement>(null);
   const thumbnailRefs = useRef(new Map<number, HTMLDivElement>());
   const panStart = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
+  const wheelTurnLocked = useRef(false);
+  const wheelTurnTimer = useRef<number | null>(null);
   const taskRef = useRef<ReturnType<typeof loadPdf> | null>(null);
   const documentTaskRef = useRef<ReturnType<typeof loadPdf> | null>(null);
   const passwordUpdater = useRef<((value: string) => void) | null>(null);
@@ -269,6 +271,7 @@ export function PdfStudio() {
 
   useEffect(() => () => {
     loadId.current += 1;
+    window.clearTimeout(wheelTurnTimer.current ?? undefined);
     void taskRef.current?.destroy();
     void documentTaskRef.current?.destroy();
   }, []);
@@ -668,6 +671,27 @@ export function PdfStudio() {
 
   function stopPan() { panStart.current = null; }
 
+  function handleReaderWheel(event: ReactWheelEvent<HTMLDivElement>) {
+    if (!session || !pdfDocument || event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+    const stage = readerStage.current;
+    if (!stage) return;
+    const atTop = stage.scrollTop <= 2;
+    const atBottom = stage.scrollTop + stage.clientHeight >= stage.scrollHeight - 2;
+    const direction = event.deltaY > 0 && atBottom ? 1 : event.deltaY < 0 && atTop ? -1 : 0;
+    if (!direction || (direction > 0 && page >= pageOrder.length) || (direction < 0 && page <= 1)) return;
+
+    // Treat a trackpad or wheel burst as one page turn, even if it emits many events.
+    event.preventDefault();
+    if (wheelTurnLocked.current) {
+      window.clearTimeout(wheelTurnTimer.current ?? undefined);
+      wheelTurnTimer.current = window.setTimeout(() => { wheelTurnLocked.current = false; wheelTurnTimer.current = null; }, 360);
+      return;
+    }
+    wheelTurnLocked.current = true;
+    wheelTurnTimer.current = window.setTimeout(() => { wheelTurnLocked.current = false; wheelTurnTimer.current = null; }, 360);
+    setPage(current => Math.max(1, Math.min(pageOrder.length, current + direction)));
+  }
+
   function movePage(from: number, to: number) {
     if (to < 0 || to >= pageOrder.length || from === to) return;
     const next = [...pageOrder];
@@ -870,7 +894,7 @@ export function PdfStudio() {
         </aside>
 
         <section className={'pdf-reader' + (dragOver ? ' is-drop-target' : '')} aria-label="PDF reader" onDragOver={event => { event.preventDefault(); setDragOver(true); }} onDrop={handleDrop}>
-          <div className={'pdf-reader-stage' + (tool === 'Read' ? ' is-read-mode' : '')} ref={readerStage} tabIndex={0} aria-label="Scrollable PDF page area" title={tool === 'Read' ? 'Drag to pan or scroll to move around the page' : 'Scroll here to view the full page'} onPointerDown={startPan} onPointerMove={movePan} onPointerUp={stopPan} onPointerCancel={stopPan}>
+          <div className={'pdf-reader-stage' + (tool === 'Read' ? ' is-read-mode' : '')} ref={readerStage} tabIndex={0} aria-label="Scrollable PDF page area" title={tool === 'Read' ? 'Scroll through the page; keep scrolling at an edge to turn pages. Drag to pan.' : 'Scroll here to view the full page; keep scrolling at an edge to turn pages.'} onWheel={handleReaderWheel} onPointerDown={startPan} onPointerMove={movePan} onPointerUp={stopPan} onPointerCancel={stopPan}>
             {!session && !loading && <div className="pdf-welcome"><span className="pdf-welcome-icon"><Icon name="notes"/></span><p className="pdf-eyebrow">DAYNEST PDF STUDIO</p><h2>A quieter place to work with PDFs.</h2><p>Read, search, mark up, arrange pages and export a copy.</p><div className="pdf-welcome-actions"><button className="pdf-export-button" type="button" onClick={openFilePicker}><Icon name="upload"/> Open a PDF</button><button className="pdf-welcome-folder" type="button" onClick={openFolderPicker}><PdfFolderIcon/> Open folder</button></div><span className="pdf-drop-copy">or drop a PDF anywhere in this window</span>{folderInfo && <p className="pdf-welcome-folder-info" title={folderInfo.name}><PdfFolderIcon/> {folderInfo.name} · {folderInfo.pdfCount} PDF{folderInfo.pdfCount === 1 ? '' : 's'}</p>}{recentFiles.length > 0 && <section className="pdf-welcome-recents" aria-label="Recent PDFs"><div className="pdf-welcome-recents-heading"><Icon name="history"/><strong>Recent files</strong><span>{recentFiles.length}</span></div><div>{recentFiles.slice(0, 3).map(file => <button key={file.id} type="button" className="pdf-welcome-recent" title={'Open ' + file.name} onClick={() => void openRecentFile(file.id)}><Icon name="notes"/><span><strong>{file.name}</strong><small>{file.pageCount ? `${file.pageCount} pages · ` : ''}{formatSize(file.size)}{file.folder ? ' · ' + file.folder : ''}</small></span><Icon name="right"/></button>)}</div></section>}</div>}
             {loading && !pdfDocument && <div className="pdf-load-state"><span className="pdf-loader"/><strong>{notice || 'Opening your PDF…'}</strong>{loadingProgress > 0 && <div className="pdf-load-progress" role="progressbar" aria-label="Loading PDF" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loadingProgress}><span style={{ width: loadingProgress + '%' }}/></div>}</div>}
             {session && pdfDocument && activePage && <PdfPageSurface page={activePage} pageNumber={sourcePage} scale={renderScale} viewRotation={pageRotation} tool={tool} color={tool === 'Highlight' ? highlightColor : tool === 'Note' ? noteColor : inkColor} highlightOpacity={highlightOpacity} strokeWidth={strokeWidth} selectedMarkId={selectedMarkId} marks={marks} searchTerm={searchTerm} onAddMark={addMark} onEraseMark={removeMark} onPlaceNote={point => { setPendingNote(point); setNoteText(''); setMobilePanelOpen(true); announce('Write your note in the Properties panel, then add it to the page.'); }} />}
